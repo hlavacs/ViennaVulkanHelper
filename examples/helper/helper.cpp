@@ -250,6 +250,7 @@ bool RenderNextFrame(EngineState& engine, WindowState& window, VulkanState& vulk
 }
 
 
+
 void Step( EngineState& engine, WindowState& window, VulkanState& vulkan ) {
     SDL_Event event;
     SDL_PollEvent(&event);
@@ -282,11 +283,6 @@ void Step( EngineState& engine, WindowState& window, VulkanState& vulkan ) {
         RecordNextFrame(engine, window, vulkan);
         RenderNextFrame(engine, window, vulkan);
     }
-}
-
-
-void MyGame(EngineState& engine, WindowState& window, VulkanState& vulkan) {
-
 }
 
 
