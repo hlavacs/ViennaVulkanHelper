@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/data/GitHub/VulkanHelper/build/_deps/vkbootstrap-subbuild/CMakeFiles/vkbootstrap-populate"
+		},
+		{
+			"file" : "C:/data/GitHub/VulkanHelper/build/_deps/vkbootstrap-subbuild/CMakeFiles/vkbootstrap-populate.rule"
+		},
+		{
+			"file" : "C:/data/GitHub/VulkanHelper/build/_deps/vkbootstrap-subbuild/CMakeFiles/vkbootstrap-populate-complete.rule"
+		},
+		{
+			"file" : "C:/data/GitHub/VulkanHelper/build/_deps/vkbootstrap-subbuild/vkbootstrap-populate-prefix/src/vkbootstrap-populate-stamp/vkbootstrap-populate-build.rule"
+		},
+		{
+			"file" : "C:/data/GitHub/VulkanHelper/build/_deps/vkbootstrap-subbuild/vkbootstrap-populate-prefix/src/vkbootstrap-populate-stamp/vkbootstrap-populate-configure.rule"
+		},
+		{
+			"file" : "C:/data/GitHub/VulkanHelper/build/_deps/vkbootstrap-subbuild/vkbootstrap-populate-prefix/src/vkbootstrap-populate-stamp/vkbootstrap-populate-download.rule"
+		},
+		{
+			"file" : "C:/data/GitHub/VulkanHelper/build/_deps/vkbootstrap-subbuild/vkbootstrap-populate-prefix/src/vkbootstrap-populate-stamp/vkbootstrap-populate-install.rule"
+		},
+		{
+			"file" : "C:/data/GitHub/VulkanHelper/build/_deps/vkbootstrap-subbuild/vkbootstrap-populate-prefix/src/vkbootstrap-populate-stamp/vkbootstrap-populate-mkdir.rule"
+		},
+		{
+			"file" : "C:/data/GitHub/VulkanHelper/build/_deps/vkbootstrap-subbuild/vkbootstrap-populate-prefix/src/vkbootstrap-populate-stamp/vkbootstrap-populate-patch.rule"
+		},
+		{
+			"file" : "C:/data/GitHub/VulkanHelper/build/_deps/vkbootstrap-subbuild/vkbootstrap-populate-prefix/src/vkbootstrap-populate-stamp/vkbootstrap-populate-test.rule"
+		},
+		{
+			"file" : "C:/data/GitHub/VulkanHelper/build/_deps/vkbootstrap-subbuild/vkbootstrap-populate-prefix/src/vkbootstrap-populate-stamp/vkbootstrap-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"vkbootstrap-populate"
+		],
+		"name" : "vkbootstrap-populate"
+	}
+}

@@ -1,0 +1,14 @@
+# Target labels
+ stb_image-populate
+# Source files and their labels
+C:/data/GitHub/VulkanHelper/build/_deps/stb_image-subbuild/CMakeFiles/stb_image-populate
+C:/data/GitHub/VulkanHelper/build/_deps/stb_image-subbuild/CMakeFiles/stb_image-populate.rule
+C:/data/GitHub/VulkanHelper/build/_deps/stb_image-subbuild/CMakeFiles/stb_image-populate-complete.rule
+C:/data/GitHub/VulkanHelper/build/_deps/stb_image-subbuild/stb_image-populate-prefix/src/stb_image-populate-stamp/stb_image-populate-build.rule
+C:/data/GitHub/VulkanHelper/build/_deps/stb_image-subbuild/stb_image-populate-prefix/src/stb_image-populate-stamp/stb_image-populate-configure.rule
+C:/data/GitHub/VulkanHelper/build/_deps/stb_image-subbuild/stb_image-populate-prefix/src/stb_image-populate-stamp/stb_image-populate-download.rule
+C:/data/GitHub/VulkanHelper/build/_deps/stb_image-subbuild/stb_image-populate-prefix/src/stb_image-populate-stamp/stb_image-populate-install.rule
+C:/data/GitHub/VulkanHelper/build/_deps/stb_image-subbuild/stb_image-populate-prefix/src/stb_image-populate-stamp/stb_image-populate-mkdir.rule
+C:/data/GitHub/VulkanHelper/build/_deps/stb_image-subbuild/stb_image-populate-prefix/src/stb_image-populate-stamp/stb_image-populate-patch.rule
+C:/data/GitHub/VulkanHelper/build/_deps/stb_image-subbuild/stb_image-populate-prefix/src/stb_image-populate-stamp/stb_image-populate-test.rule
+C:/data/GitHub/VulkanHelper/build/_deps/stb_image-subbuild/stb_image-populate-prefix/src/stb_image-populate-stamp/stb_image-populate-update.rule

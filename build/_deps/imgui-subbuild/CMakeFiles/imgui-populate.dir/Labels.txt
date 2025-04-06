@@ -1,0 +1,14 @@
+# Target labels
+ imgui-populate
+# Source files and their labels
+C:/data/GitHub/VulkanHelper/build/_deps/imgui-subbuild/CMakeFiles/imgui-populate
+C:/data/GitHub/VulkanHelper/build/_deps/imgui-subbuild/CMakeFiles/imgui-populate.rule
+C:/data/GitHub/VulkanHelper/build/_deps/imgui-subbuild/CMakeFiles/imgui-populate-complete.rule
+C:/data/GitHub/VulkanHelper/build/_deps/imgui-subbuild/imgui-populate-prefix/src/imgui-populate-stamp/imgui-populate-build.rule
+C:/data/GitHub/VulkanHelper/build/_deps/imgui-subbuild/imgui-populate-prefix/src/imgui-populate-stamp/imgui-populate-configure.rule
+C:/data/GitHub/VulkanHelper/build/_deps/imgui-subbuild/imgui-populate-prefix/src/imgui-populate-stamp/imgui-populate-download.rule
+C:/data/GitHub/VulkanHelper/build/_deps/imgui-subbuild/imgui-populate-prefix/src/imgui-populate-stamp/imgui-populate-install.rule
+C:/data/GitHub/VulkanHelper/build/_deps/imgui-subbuild/imgui-populate-prefix/src/imgui-populate-stamp/imgui-populate-mkdir.rule
+C:/data/GitHub/VulkanHelper/build/_deps/imgui-subbuild/imgui-populate-prefix/src/imgui-populate-stamp/imgui-populate-patch.rule
+C:/data/GitHub/VulkanHelper/build/_deps/imgui-subbuild/imgui-populate-prefix/src/imgui-populate-stamp/imgui-populate-test.rule
+C:/data/GitHub/VulkanHelper/build/_deps/imgui-subbuild/imgui-populate-prefix/src/imgui-populate-stamp/imgui-populate-update.rule
