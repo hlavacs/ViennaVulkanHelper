@@ -2,19 +2,17 @@ set(TARGET helper)
 
 set(SOURCE 
 	helper.cpp
-	${PROJECT_SOURCE_DIR}/src/VHSDL3.cpp
 	${PROJECT_SOURCE_DIR}/src/VHBuffer.cpp
 	${PROJECT_SOURCE_DIR}/src/VHCommand.cpp
 	${PROJECT_SOURCE_DIR}/src/VHDevice.cpp
 	${PROJECT_SOURCE_DIR}/src/VHImage.cpp
 	${PROJECT_SOURCE_DIR}/src/VHRender.cpp
 	${PROJECT_SOURCE_DIR}/src/VHSync.cpp
-	${PROJECT_SOURCE_DIR}/src/VHVulkan.cpp
+	${PROJECT_SOURCE_DIR}/src/VHInclude.cpp
 )
 
 set(HEADERS 
 	helper.h
-	${INCLUDE}/VHSDL3.h
 	${INCLUDE}/VHBuffer.h
 	${INCLUDE}/VHCommand.h
 	${INCLUDE}/VHDevice.h

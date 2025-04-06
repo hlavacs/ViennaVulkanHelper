@@ -28,6 +28,18 @@ namespace std {
 }
 
 
+#define VHCHECKRESULT(x)          \
+    {                             \
+        VkResult retval = (x);    \
+        if (retval != VK_SUCCESS) \
+        {                         \
+			std::out << "ERROR: " << std::endl; \\
+            exit(retval);		        \
+        }                        \
+    }
+
+
+
 namespace vh {
 
 	//--------------------------------------------------------------------
@@ -275,19 +287,11 @@ namespace vh {
         std::vector<VkSemaphore> m_renderFinishedSemaphores;
     };
 
-
-    std::vector<char> VulReadFile(const std::string& filename);
-
-	void VulSetupImgui(SDL_Window* sdlWindow, VkInstance instance, VkPhysicalDevice physicalDevice, QueueFamilyIndices queueFamilies
-        , VkDevice device, VkQueue graphicsQueue, VkCommandPool commandPool, VkDescriptorPool descriptorPool
-        , VkRenderPass renderPass);
-
 }
 
-
 #include "VHBuffer.h"
-#include "VHCommand.h"
+#include "VHImage.h"
 #include "VHDevice.h"
+#include "VHCommand.h"
 #include "VHRender.h"
-#include "VHVulkan.h"
 #include "VHSync.h"

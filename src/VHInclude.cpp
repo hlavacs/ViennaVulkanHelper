@@ -33,11 +33,11 @@ namespace vh
     
 	extern VkInstance volkInstance;
 
-	auto VulLoadVolk(const char* name, void* context) {
+	auto LoadVolk(const char* name, void* context) {
    		return vkGetInstanceProcAddr(volkInstance, name);
 	}
 
-    std::vector<char> VulReadFile(const std::string& filename) {
+    std::vector<char> ReadFile(const std::string& filename) {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
         if (!file.is_open()) {
@@ -60,7 +60,7 @@ namespace vh
     //------------------------------------------------------------------------
 
 
-    void VulSetupImgui(SDL_Window* sdlWindow, VkInstance instance, VkPhysicalDevice physicalDevice, QueueFamilyIndices queueFamilies
+    void SetupImgui(SDL_Window* sdlWindow, VkInstance instance, VkPhysicalDevice physicalDevice, QueueFamilyIndices queueFamilies
         , VkDevice device, VkQueue graphicsQueue, VkCommandPool commandPool, VkDescriptorPool descriptorPool
         , VkRenderPass renderPass) {
             
@@ -72,7 +72,7 @@ namespace vh
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
         //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
 
-        ImGui_ImplVulkan_LoadFunctions( VK_API_VERSION_1_1, &VulLoadVolk );
+        ImGui_ImplVulkan_LoadFunctions( VK_API_VERSION_1_1, &LoadVolk );
 
         // Setup Platform/Renderer backends
         //ImGui_ImplSDL3_InitForVulkan(sdlWindow);
@@ -97,6 +97,34 @@ namespace vh
         //ImGui_ImplVulkan_CreateFontsTexture(YOUR_COMMAND_BUFFER);
         // (your code submit a queue)
         //ImGui_ImplVulkan_DestroyFontUploadObjects();
+    }
+
+    
+    bool SDL3Init( std::string name, int width, int height) {
+        if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init SDL: %s", SDL_GetError());
+            SDL_Quit();
+            return EXIT_FAILURE;
+        }
+    
+        SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+        SDL_Window *window = SDL_CreateWindow( name.c_str(), width, height, window_flags);
+        if (!window) {
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to create SDL window: %s", SDL_GetError());
+            SDL_Quit();
+            return EXIT_FAILURE;
+        }
+    
+        unsigned int sdlExtensionCount = 0;
+        const char * const *instance_extensions = SDL_Vulkan_GetInstanceExtensions(&sdlExtensionCount);
+        if (instance_extensions == NULL) {
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to get SDL Vulkan instance extensions: %s", SDL_GetError());
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return EXIT_FAILURE;
+        }
+    
+        return true;
     }
 
 } // namespace vh
