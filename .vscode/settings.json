@@ -2,6 +2,8 @@
 	"files.associations": {
 		"iostream": "cpp",
 		"unordered_map": "cpp",
-		"set": "cpp"
+		"set": "cpp",
+		"vector": "cpp",
+		"xstring": "cpp"
 	}
 }
