@@ -32,9 +32,25 @@ endif()
 
 
 #--------------------------------- Find VulkanSDK ---------------------------------#
+# Vulkan SDK
 find_package(Vulkan REQUIRED)
-message("Vulkan_INCLUDE_DIR: " ${Vulkan_INCLUDE_DIR})
+set(VULKAN_SDK $ENV{VULKAN_SDK})
 
+if (WIN32)
+	set(VULKAN_INCLUDE Include)
+	set(VULKAN_LIB Lib)
+elseif (APPLE)
+	set(VULKAN_INCLUDE include)
+    set(VULKAN_LIB lib)
+elseif (UNIX AND NOT APPLE)
+	set(VULKAN_INCLUDE include)
+	set(VULKAN_LIB lib)
+endif()
+
+include_directories(${VULKAN_SDK}/${VULKAN_INCLUDE})
+include_directories(${VULKAN_SDK}/${VULKAN_INCLUDE}/volk)
+include_directories(${VULKAN_SDK}/${VULKAN_INCLUDE}/vma)
+link_directories(${VULKAN_SDK}/lib)
 
 #--------------------------------- Fetch necessary Git repos ---------------------------------#
 

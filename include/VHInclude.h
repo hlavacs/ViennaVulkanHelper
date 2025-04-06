@@ -3,6 +3,14 @@
 #include <iostream>
 #include <iomanip>
 
+#ifdef VIENNA_VULKAN_HELPER_IMPL
+	#define STB_IMAGE_IMPLEMENTATION
+	#define STB_IMAGE_WRITE_IMPLEMENTATION
+	#define VOLK_IMPLEMENTATION
+	#define VMA_IMPLEMENTATION
+	#define IMGUI_IMPL_VULKAN_USE_VOLK
+#endif
+
 #define SDL_MAIN_HANDLED
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
@@ -14,7 +22,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
-
 
 #if (defined(VVE_SINGLE_PRECISION) && defined(VVE_DOUBLE_PRECISION))
 	#error "Both VVE_SINGLE_PRECISION and VVE_DOUBLE_PRECISION are defined!"
@@ -86,6 +93,7 @@ namespace vve {
         }                        \
     }
 
+#include "VHSDL3.h"
 #include "VHVulkan.h"
 #include "VHBuffer.h"
 #include "VHImage.h"

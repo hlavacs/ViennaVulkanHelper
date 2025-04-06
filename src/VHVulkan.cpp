@@ -20,34 +20,7 @@
 #include <set>
 #include <unordered_map>
 
-#define SDL_MAIN_HANDLED
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_vulkan.h>
-
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb_image_write.h>
-
-#define VOLK_IMPLEMENTATION
-#include "volk/volk.h"
-
-#define VMA_IMPLEMENTATION
-#include "vma/vk_mem_alloc.h"
-
-#define IMGUI_IMPL_VULKAN_USE_VOLK
-#include "imgui.h"
-#include "backends/imgui_impl_sdl3.h"
-#include "backends/imgui_impl_vulkan.h"
-
-#include "VHVulkan.h"
+#include "VHInclude.h"
 
 
 namespace vh
