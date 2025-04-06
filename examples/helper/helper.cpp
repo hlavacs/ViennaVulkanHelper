@@ -10,7 +10,7 @@ int main() {
     }
 
     SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
-    SDL_Window *window = SDL_CreateWindow( "SDL3 Vulkan ImGui Setup", 800, 600, window_flags);
+    SDL_Window *window = SDL_CreateWindow( "Vulkan Helper Functions", 800, 600, window_flags);
     if (!window) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to create SDL window: %s", SDL_GetError());
         SDL_Quit();
