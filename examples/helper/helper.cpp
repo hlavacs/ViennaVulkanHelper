@@ -80,8 +80,8 @@ struct Object {
     vh::Mesh            m_mesh;
     std::vector<VkDescriptorSet> m_descriptorSets;
 
-    glm::mat4 m_localToParent; //contains position, orientation and scale
-    glm::mat4 m_localToWorld;
+    glm::mat4 m_localToParent{1.0f}; //contains position, orientation and scale
+    glm::mat4 m_localToWorld{1.0f};
 
     std::shared_ptr<Object> m_nextSibling{nullptr};
     std::shared_ptr<Object> m_firstChild{nullptr};
@@ -97,8 +97,8 @@ struct Object {
 };
 
 struct SceneState {
-    std::unique_ptr<Object> m_root;
-    std::map<std::string, std::shared_ptr<Object>> m_map;
+    std::shared_ptr<Object> m_root;
+    std::map<std::string, std::shared_ptr<Object>> m_map{ {"root", {m_root}} };
 };
 
 std::vector<const char*> ToCharPtr(const std::vector<std::string>& vec) { 
@@ -222,7 +222,6 @@ bool RecordNextFrame(EngineState& engine, WindowState& window, VulkanState& vulk
 
     vh::ComEndRecordCommandBuffer(vulkan.m_commandBuffers[vulkan.m_currentFrame]);
 
-    //SubmitCommandBuffer(m_commandBuffers[vulkan.m_currentFrame]);
     return false;
 }
 
@@ -248,8 +247,6 @@ bool RenderNextFrame(EngineState& engine, WindowState& window, VulkanState& vulk
     } else assert(result == VK_SUCCESS);
     return false;
 }
-
-
 
 void Step( EngineState& engine, WindowState& window, VulkanState& vulkan ) {
     SDL_Event event;
