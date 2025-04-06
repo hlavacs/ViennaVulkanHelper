@@ -40,27 +40,19 @@ message("Vulkan_INCLUDE_DIR: " ${Vulkan_INCLUDE_DIR})
 
 include(FetchContent) # enable Fetch Content
 
-
-
-#--------------------------------- Fetch SDL2 ---------------------------------#
-#set(SDL_STATIC true)
-FetchContent_Declare(sdl2
-                     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-                     GIT_TAG SDL2
-)
-FetchContent_MakeAvailable(sdl2)
-include_directories (${sdl2_SOURCE_DIR}/include)
-
 #--------------------------------- Fetch SDL3 ---------------------------------#
-#set(SDL_STATIC true)
-#FetchContent_Declare(sdl3
-#                     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-#                     GIT_TAG main
-#)
-#FetchContent_MakeAvailable(sdl3)
-#include_directories (${sdl3_SOURCE_DIR}/include)
+
+set(SDL_STATIC ON)
+set(SDL_SHARED OFF)
+FetchContent_Declare(sdl3
+                     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+                     GIT_TAG main
+)
+FetchContent_MakeAvailable(sdl3)
+include_directories (${sdl3_SOURCE_DIR}/include)
 
 #--------------------------------- Fetch ImGui ---------------------------------#
+
 FetchContent_Declare(imgui
                      GIT_REPOSITORY https://github.com/ocornut/imgui.git 
                      GIT_TAG master)
@@ -71,14 +63,14 @@ add_library(imgui)
 target_include_directories(imgui SYSTEM PUBLIC ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)
 target_include_directories(imgui SYSTEM PRIVATE ${Vulkan_INCLUDE_DIRS})
 target_compile_definitions(imgui PRIVATE IMGUI_IMPL_VULKAN_NO_PROTOTYPES)
-target_link_libraries(imgui SDL2::SDL2)
+target_link_libraries(imgui SDL3::SDL3)
 target_sources(imgui PRIVATE
     ${imgui_SOURCE_DIR}/imgui.cpp
     ${imgui_SOURCE_DIR}/imgui_draw.cpp
     ${imgui_SOURCE_DIR}/imgui_widgets.cpp
     ${imgui_SOURCE_DIR}/imgui_tables.cpp
     ${imgui_SOURCE_DIR}/imgui_demo.cpp
-    ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl2.cpp
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl3.cpp
     ${imgui_SOURCE_DIR}/backends/imgui_impl_vulkan.cpp
 )
 # available now as imgui
@@ -109,30 +101,9 @@ FetchContent_Declare(stb_image
 FetchContent_MakeAvailable(stb_image)
 include_directories (${stb_image_SOURCE_DIR})
 
-
-
-
-
 #--------------------------------- Main Target ---------------------------------#
 
 set(INCLUDE ${PROJECT_SOURCE_DIR}/include)
 include_directories(${INCLUDE})
 add_subdirectory(examples)
-
-#set(TARGET 28_model_loading)
-
-#set(SOURCE
-#    28_model_loading.cpp
-#)
-
-#set(HEADERS )
-
-#add_executable(${TARGET} ${SOURCE} ${HEADERS})
-
-#target_include_directories(${TARGET} PRIVATE stb)
-#target_include_directories(${TARGET} PRIVATE ${Vulkan_INCLUDE_DIR}/volk)
-#target_include_directories(${TARGET} PRIVATE ${Vulkan_INCLUDE_DIR}/vma)
-#target_include_directories(${TARGET} SYSTEM PRIVATE ${Vulkan_INCLUDE_DIRS})
-#target_link_libraries(${TARGET} PRIVATE SDL2::SDL2 vk-bootstrap::vk-bootstrap imgui)
-
 

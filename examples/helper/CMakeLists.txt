@@ -30,5 +30,5 @@ target_include_directories(${TARGET} PRIVATE stb)
 target_include_directories(${TARGET} PRIVATE ${Vulkan_INCLUDE_DIR}/volk)
 target_include_directories(${TARGET} PRIVATE ${Vulkan_INCLUDE_DIR}/vma)
 target_include_directories(${TARGET} SYSTEM PRIVATE ${Vulkan_INCLUDE_DIRS})
-target_link_libraries(${TARGET} PRIVATE SDL2::SDL2 vk-bootstrap::vk-bootstrap imgui)
+target_link_libraries(${TARGET} PRIVATE SDL3::SDL3 vk-bootstrap::vk-bootstrap imgui)
 
