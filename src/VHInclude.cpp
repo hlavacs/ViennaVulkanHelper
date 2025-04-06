@@ -75,7 +75,7 @@ namespace vh
         ImGui_ImplVulkan_LoadFunctions( VK_API_VERSION_1_1, &LoadVolk );
 
         // Setup Platform/Renderer backends
-        //ImGui_ImplSDL3_InitForVulkan(sdlWindow);
+        ImGui_ImplSDL3_InitForVulkan(sdlWindow);
         
         ImGui_ImplVulkan_InitInfo init_info = {};
         init_info.Instance = instance;
@@ -100,7 +100,7 @@ namespace vh
     }
 
     
-    bool SDL3Init( std::string name, int width, int height) {
+    bool SDL3Init( std::string name, int width, int height, std::vector<std::string>& extensions) {
         if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to init SDL: %s", SDL_GetError());
             SDL_Quit();
@@ -125,6 +125,21 @@ namespace vh
         }
     
         return true;
+    }
+
+    void initVMA(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VmaAllocator& allocator) {
+        VmaVulkanFunctions vulkanFunctions = {};
+        vulkanFunctions.vkGetInstanceProcAddr = vkGetInstanceProcAddr;
+        vulkanFunctions.vkGetDeviceProcAddr = vkGetDeviceProcAddr;
+
+        VmaAllocatorCreateInfo allocatorCreateInfo = {};
+        allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
+        allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_2;
+        allocatorCreateInfo.physicalDevice = physicalDevice;
+        allocatorCreateInfo.device = device;
+        allocatorCreateInfo.instance = instance;
+        allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
+        vmaCreateAllocator(&allocatorCreateInfo, &allocator);
     }
 
 } // namespace vh

@@ -28,7 +28,7 @@
 #include <VkBootstrap.h>
 #include "vma/vk_mem_alloc.h"
 #include "imgui.h"
-#include "backends/imgui_impl_sdl2.h"
+#include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_vulkan.h"
 
 #include "VHVulkan.h"
@@ -42,6 +42,8 @@ namespace vh {
 		, VkDevice device, VkQueue graphicsQueue, VkCommandPool commandPool, VkDescriptorPool descriptorPool
 		, VkRenderPass renderPass);
 
-	bool SDL3Init( std::string name, int width, int height);
+	bool SDL3Init( std::string name, int width, int height, std::vector<std::string>& extensions );
+
+	void initVMA(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VmaAllocator& allocator);
 
 };
