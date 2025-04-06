@@ -2,24 +2,7 @@
 #define VIENNA_VULKAN_HELPER_IMPL
 #include "VHInclude.h"
 #include <iostream>
-
-struct Object {
-    vh::BufferPerObject m_ubo; 
-    vh::Buffer m_uniformBuffers;
-    vh::Map m_texture;
-    vh::Mesh m_mesh;
-    std::vector<VkDescriptorSet> m_descriptorSets;
-
-    glm::mat4 m_localToParent;
-    glm::mat4 m_localToWorld;
-
-    std::unique_ptr<Object> m_nextSibling{nullptr};
-    std::unique_ptr<Object> m_firstChild{nullptr};
-
-    ~Object() {
-
-    };
-};
+#include <map>
 
 struct EngineState {
     const std::string m_name;
@@ -29,6 +12,7 @@ struct EngineState {
     bool m_debug;		
     bool m_initialized;
     bool m_running;	
+    double m_dt;
 };
 
 struct WindowState {
@@ -65,8 +49,8 @@ struct VulkanState {
     vh::DepthImage 	m_depthImage;
     VkFormat		m_depthMapFormat{VK_FORMAT_UNDEFINED};
 
-    std::vector<VkCommandPool> m_commandPools;
-    std::vector<VkCommandBuffer> m_commandBuffers;
+    std::vector<VkCommandPool> m_commandPools; //per frame in flight
+    std::vector<VkCommandBuffer> m_commandBuffers; //collect command buffers to submit
 
     std::vector<VkSemaphore> m_imageAvailableSemaphores;
     std::vector<VkSemaphore> m_renderFinishedSemaphores;
@@ -78,26 +62,50 @@ struct VulkanState {
     VkDescriptorSetLayout m_descriptorSetLayoutPerFrame;
     vh::DescriptorSet m_descriptorSetPerFrame{0};
     VkRenderPass m_renderPass;
-    VkDescriptorPool m_descriptorPool;    
+    VkDescriptorPool m_descriptorPool;
 
-    std::vector<Object> m_objects;
+    std::vector<vh::Pipeline> m_pipelines;
 
     uint32_t m_currentFrame = MAX_FRAMES_IN_FLIGHT - 1;
     uint32_t m_imageIndex;
     bool m_framebufferResized = false;
 };
 
-struct SceneState {
-    std::unique_ptr<Object> m_root;
+struct Object {
+    const VulkanState&  m_vulkan;
+    std::string         m_name;
+    vh::BufferPerObjectTexture m_ubo; 
+    vh::Buffer          m_uniformBuffers;
+    vh::Map             m_texture;
+    vh::Mesh            m_mesh;
+    std::vector<VkDescriptorSet> m_descriptorSets;
+
+    glm::mat4 m_localToParent; //contains position, orientation and scale
+    glm::mat4 m_localToWorld;
+
+    std::shared_ptr<Object> m_nextSibling{nullptr};
+    std::shared_ptr<Object> m_firstChild{nullptr};
+
+    ~Object() {
+        vkDestroySampler(m_vulkan.m_device, m_texture.m_mapSampler, nullptr);
+        vkDestroyImageView(m_vulkan.m_device, m_texture.m_mapImageView, nullptr);
+        vh::ImgDestroyImage(m_vulkan.m_device, m_vulkan.m_vmaAllocator, m_texture.m_mapImage, m_texture.m_mapImageAllocation);
+        vh::BufDestroyBuffer(m_vulkan.m_device, m_vulkan.m_vmaAllocator, m_mesh.m_indexBuffer, m_mesh.m_indexBufferAllocation);
+        vh::BufDestroyBuffer(m_vulkan.m_device, m_vulkan.m_vmaAllocator, m_mesh.m_vertexBuffer, m_mesh.m_vertexBufferAllocation);
+        vh::BufDestroyBuffer2(m_vulkan.m_device, m_vulkan.m_vmaAllocator, m_uniformBuffers);
+    };
 };
 
+struct SceneState {
+    std::unique_ptr<Object> m_root;
+    std::map<std::string, std::shared_ptr<Object>> m_map;
+};
 
 std::vector<const char*> ToCharPtr(const std::vector<std::string>& vec) { 
     std::vector<const char*> res;
     for( auto& str : vec) res.push_back(str.c_str());
     return res;
 }
-
 
 void Init( EngineState& engine, WindowState& window, VulkanState& vulkan ) {
     vh::SDL3Init( std::string("Vienna Vulkan Helper"), 800, 600, vulkan.m_instanceExtensions);
@@ -142,35 +150,36 @@ void Init( EngineState& engine, WindowState& window, VulkanState& vulkan ) {
     vh::RenCreateRenderPass(vulkan.m_physicalDevice, vulkan.m_device, vulkan.m_swapChain, true, vulkan.m_renderPass);
 
     vh::RenCreateDescriptorSetLayout( vulkan.m_device, {}, vulkan.m_descriptorSetLayoutPerFrame );
-        
+    
+    vulkan.m_pipelines.resize(1);
     vh::RenCreateGraphicsPipeline(vulkan.m_device, vulkan.m_renderPass, "shaders/shader.spv", "shaders/shader.spv", {}, {},
          { vulkan.m_descriptorSetLayoutPerFrame }, 
          {}, //spezialization constants
          {}, //push constants
          {}, //blend attachments
-         vulkan.m_graphicsPipeline);
+         vulkan.m_pipelines[0]);
 
-    vh::ComCreateCommandPool(vulkan.m_surface, vulkan.m_physicalDevice, vulkan.m_device, vulkan.m_commandPool);
-    vh::ComCreateCommandPool(vulkan.m_surface, vulkan.m_physicalDevice, vulkan.m_device, vulkan.m_commandPool);
+    vulkan.m_commandPools.resize(MAX_FRAMES_IN_FLIGHT);
+    for( int i=0; i<MAX_FRAMES_IN_FLIGHT; ++i) {
+        vh::ComCreateCommandPool(vulkan.m_surface, vulkan.m_physicalDevice, vulkan.m_device, vulkan.m_commandPools[i]);
+    }
     
     vh::RenCreateDepthResources(vulkan.m_physicalDevice, vulkan.m_device, vulkan.m_vmaAllocator, vulkan.m_swapChain, vulkan.m_depthImage);
-    vh::ImgTransitionImageLayout2(vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_commandPool,
+    vh::ImgTransitionImageLayout2(vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_commandPools[0],
         vulkan.m_depthImage.m_depthImage, vulkan.m_swapChain.m_swapChainImageFormat, 
         VK_IMAGE_ASPECT_DEPTH_BIT, 1, 1, VK_IMAGE_LAYOUT_UNDEFINED , VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
     
     for( auto image : vulkan.m_swapChain.m_swapChainImages ) {
-        vh::ImgTransitionImageLayout(vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_commandPool,
+        vh::ImgTransitionImageLayout(vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_commandPools[0],
             image, vulkan.m_swapChain.m_swapChainImageFormat, 
             VK_IMAGE_LAYOUT_UNDEFINED , VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
     }
 
     vh::RenCreateFramebuffers(vulkan.m_device, vulkan.m_swapChain, vulkan.m_depthImage, vulkan.m_renderPass);
-    vh::ComCreateCommandBuffers(vulkan.m_device, vulkan.m_commandPool, vulkan.m_commandBuffers);
     vh::RenCreateDescriptorPool(vulkan.m_device, 1000, vulkan.m_descriptorPool);
     vh::SynCreateSemaphores(vulkan.m_device, vulkan.m_imageAvailableSemaphores, vulkan.m_renderFinishedSemaphores, 3, vulkan.m_intermediateSemaphores);
 
     vh::SynCreateFences(vulkan.m_device, MAX_FRAMES_IN_FLIGHT, vulkan.m_fences);
-
 }
 
 
@@ -178,14 +187,15 @@ bool PrepareNextFrame(EngineState& engine, WindowState& window, VulkanState& vul
     if(window.m_isMinimized) return false;
 
     vulkan.m_currentFrame = (vulkan.m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
-    vulkan.m_commandBuffersSubmit.clear();
+    vulkan.m_commandBuffers.resize(1);
+    vh::ComCreateCommandBuffers(vulkan.m_device, vulkan.m_commandPools[vulkan.m_currentFrame], vulkan.m_commandBuffers);
 
-    vkWaitForFences(vulkan.m_device, 1, &m_fences[vulkan.m_currentFrame], VK_TRUE, UINT64_MAX);
+    vkWaitForFences(vulkan.m_device, 1, &vulkan.m_fences[vulkan.m_currentFrame], VK_TRUE, UINT64_MAX);
 
     VkResult result = vkAcquireNextImageKHR(vulkan.m_device, vulkan.m_swapChain.m_swapChain, UINT64_MAX,
                         vulkan.m_imageAvailableSemaphores[vulkan.m_currentFrame], VK_NULL_HANDLE, &vulkan.m_imageIndex);
 
-    vh::ImgTransitionImageLayout(vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_commandPool, 
+    vh::ImgTransitionImageLayout(vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_commandPools[0], 
         vulkan.m_swapChain.m_swapChainImages[vulkan.m_imageIndex], vulkan.m_swapChain.m_swapChainImageFormat, 
         VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
@@ -210,7 +220,7 @@ bool RecordNextFrame(EngineState& engine, WindowState& window, VulkanState& vulk
         window.m_clearColor, 
         vulkan.m_currentFrame);
 
-    vh::ComEndRecordCommandBuffer(m_commandBuffers[vulkan.m_currentFrame]);
+    vh::ComEndRecordCommandBuffer(vulkan.m_commandBuffers[vulkan.m_currentFrame]);
 
     //SubmitCommandBuffer(m_commandBuffers[vulkan.m_currentFrame]);
     return false;
@@ -219,15 +229,15 @@ bool RecordNextFrame(EngineState& engine, WindowState& window, VulkanState& vulk
 bool RenderNextFrame(EngineState& engine, WindowState& window, VulkanState& vulkan) {
     if(window.m_isMinimized) return false;
         
-    vh::ComSubmitCommandBuffers(vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_commandBuffersSubmit, 
+    vh::ComSubmitCommandBuffers(vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_commandBuffers, 
         vulkan.m_imageAvailableSemaphores, vulkan.m_renderFinishedSemaphores, vulkan.m_intermediateSemaphores, vulkan.m_fences, vulkan.m_currentFrame);
 
-    vh::ImgTransitionImageLayout(vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_commandPool, 
+    vh::ImgTransitionImageLayout(vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_commandPools[0], 
         vulkan.m_swapChain.m_swapChainImages[vulkan.m_imageIndex], vulkan.m_swapChain.m_swapChainImageFormat, 
         VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
     VkResult result = vh::ComPresentImage(vulkan.m_presentQueue, vulkan.m_swapChain, 
-        vulkan.m_imageIndex, m_renderFinishedSemaphores[vulkan.m_currentFrame]);
+        vulkan.m_imageIndex, vulkan.m_renderFinishedSemaphores[vulkan.m_currentFrame]);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || vulkan.m_framebufferResized) {
         vulkan.m_framebufferResized = false;
@@ -274,6 +284,12 @@ void Step( EngineState& engine, WindowState& window, VulkanState& vulkan ) {
     }
 }
 
+
+void MyGame(EngineState& engine, WindowState& window, VulkanState& vulkan) {
+
+}
+
+
 int main() {
     EngineState engine;
     WindowState window;
@@ -293,15 +309,45 @@ int main() {
 
     Init(engine, window, vulkan);
 
+    auto prev = std::chrono::high_resolution_clock::now();
     while (engine.m_running) {
+        auto now = std::chrono::high_resolution_clock::now();
+		engine.m_dt = std::chrono::duration<double, std::micro>(now - prev).count() / 1'000'000.0;
+        prev = now;
         Step(engine, window, vulkan);
     };
 
     vkDeviceWaitIdle(vulkan.m_device);
 
-    scene.m_root = nullptr;
+    scene.m_root = nullptr; //clear all objects
 
-    std::cout << "Hello world\n";
+    vh::DevCleanupSwapChain(vulkan.m_device, vulkan.m_vmaAllocator, vulkan.m_swapChain, vulkan.m_depthImage);
+
+    for( auto& pipe : vulkan.m_pipelines) {
+        vkDestroyPipeline(vulkan.m_device, pipe.m_pipeline, nullptr);
+        vkDestroyPipelineLayout(vulkan.m_device, pipe.m_pipelineLayout, nullptr);
+    }
+
+    vkDestroyDescriptorPool(vulkan.m_device, vulkan.m_descriptorPool, nullptr);
+
+    vkDestroyDescriptorSetLayout(vulkan.m_device, vulkan.m_descriptorSetLayoutPerFrame, nullptr);
+
+    for( auto& pool : vulkan.m_commandPools) {
+        vkDestroyCommandPool(vulkan.m_device, pool, nullptr);
+    }
+
+    vkDestroyRenderPass(vulkan.m_device, vulkan.m_renderPass, nullptr);
+    vh::SynDestroyFences(vulkan.m_device, vulkan.m_fences);
+    vh::SynDestroySemaphores(vulkan.m_device, vulkan.m_imageAvailableSemaphores, vulkan.m_renderFinishedSemaphores, vulkan.m_intermediateSemaphores);
+    vmaDestroyAllocator(vulkan.m_vmaAllocator);
+    vkDestroyDevice(vulkan.m_device, nullptr);
+    vkDestroySurfaceKHR(vulkan.m_instance, vulkan.m_surface, nullptr);
+
+    if (engine.m_debug) {
+        vh::DevDestroyDebugUtilsMessengerEXT(vulkan.m_instance, vulkan.m_debugMessenger, nullptr);
+    }
+
+    vkDestroyInstance(vulkan.m_instance, nullptr);
     return 0;
 }
 
