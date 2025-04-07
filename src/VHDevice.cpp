@@ -5,105 +5,6 @@
 namespace vh {
 
 
-	VkInstance volkInstance;
-	
-    void DevCreateInstance(const std::vector<const char*>& validationLayers, 
-		const std::vector<const char *>& extensions, const std::string& name, 
-		uint32_t& apiVersion, bool debug, VkInstance &instance) {
-
-        volkInitialize();
-
-        if (debug && !DevCheckValidationLayerSupport(validationLayers)) {
-            throw std::runtime_error("validation layers requested, but not available!");
-        }
-
-        VkApplicationInfo appInfo{};
-        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = name.c_str();
-        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.pEngineName = "Vienna Vulkan Engine";
-        appInfo.engineVersion = VK_MAKE_VERSION(2, 0, 0);
-        appInfo.apiVersion = apiVersion;
-
-        VkInstanceCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        createInfo.pApplicationInfo = &appInfo;
-        #ifdef __APPLE__
-		createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR,
-		#endif
-
-        //auto extensions = requiredExtensions;
-        createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-        createInfo.ppEnabledExtensionNames = extensions.data();
-
-        VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
-        if (debug) {
-            createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-            createInfo.ppEnabledLayerNames = validationLayers.data();
-
-            DevPopulateDebugMessengerCreateInfo(debugCreateInfo);
-            createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &debugCreateInfo;
-        } else {
-            createInfo.enabledLayerCount = 0;
-
-            createInfo.pNext = nullptr;
-        }
-
-        if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create instance!");
-        }
-        volkInstance = instance;
-
-   		volkLoadInstance(instance);
-		
-		if (vkEnumerateInstanceVersion) {
-			VkResult result = vkEnumerateInstanceVersion(&apiVersion);
-		} else {
-			apiVersion = VK_MAKE_VERSION(1, 0, 0);
-		}
-
-		std::cout << "Vulkan API Version available on this system: " << apiVersion <<  
-			" Major: " << VK_VERSION_MAJOR(apiVersion) << 
-			" Minor: " << VK_VERSION_MINOR(apiVersion) << 
-			" Patch: " << VK_VERSION_PATCH(apiVersion) << std::endl;
-
-    }
-
-    VkResult DevCreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo
-        , const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
-
-        auto func = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-        if (func != nullptr) {
-            return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-        } else {
-            return VK_ERROR_EXTENSION_NOT_PRESENT;
-        }
-    }
-
-    void DevDestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT& debugMessenger
-        , const VkAllocationCallbacks* pAllocator) {
-
-        auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-        if (func != nullptr) {
-            func(instance, debugMessenger, pAllocator);
-        }
-    }
-
-    void DevInitVMA(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, uint32_t apiVersion, VmaAllocator& allocator) {
-        VmaVulkanFunctions vulkanFunctions = {};
-        vulkanFunctions.vkGetInstanceProcAddr = vkGetInstanceProcAddr;
-        vulkanFunctions.vkGetDeviceProcAddr = vkGetDeviceProcAddr;
-
-        VmaAllocatorCreateInfo allocatorCreateInfo = {};
-        allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
-        allocatorCreateInfo.vulkanApiVersion =  apiVersion;
-        allocatorCreateInfo.physicalDevice = physicalDevice;
-        allocatorCreateInfo.device = device;
-        allocatorCreateInfo.instance = instance;
-        allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
-        vmaCreateAllocator(&allocatorCreateInfo, &allocator);
-    }
-
     void DevCleanupSwapChain(VkDevice device, VmaAllocator vmaAllocator, SwapChain& swapChain, DepthImage& depthImage) {
         vkDestroyImageView(device, depthImage.m_depthImageView, nullptr);
 
@@ -157,7 +58,12 @@ namespace vh {
         VkDebugUtilsMessengerCreateInfoEXT createInfo;
         DevPopulateDebugMessengerCreateInfo(createInfo);
 
-        if (DevCreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
+        if (DevCreateDebugUtilsMessengerEXT( {
+                .m_instance = instance, 
+                .m_pCreateInfo = &createInfo, 
+                .m_pAllocator = nullptr, 
+                .m_pDebugMessenger = &debugMessenger
+            } ) != VK_SUCCESS) {
             throw std::runtime_error("failed to set up debug messenger!");
         }
     }
@@ -464,30 +370,6 @@ namespace vh {
         return indices;
     }
 
-    bool DevCheckValidationLayerSupport(const std::vector<const char*>& validationLayers) {
-        uint32_t layerCount;
-        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-
-        std::vector<VkLayerProperties> availableLayers(layerCount);
-        vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
-
-        for (const char* layerName : validationLayers) {
-            bool layerFound = false;
-
-            for (const auto& layerProperties : availableLayers) {
-                if (strcmp(layerName, layerProperties.layerName) == 0) {
-                    layerFound = true;
-                    break;
-                }
-            }
-
-            if (!layerFound) {
-                return false;
-            }
-        }
-
-        return true;
-    }
 
 
 } // namespace vh

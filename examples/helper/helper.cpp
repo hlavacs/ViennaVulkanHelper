@@ -6,23 +6,23 @@
 
 struct EngineState {
     const std::string m_name;
-    uint32_t m_apiVersion;
-    uint32_t m_minimumVersion = VK_MAKE_VERSION(1, 1, 0);
-    uint32_t m_maximumVersion = VK_MAKE_VERSION(1, 3, 0);
-    bool m_debug;		
-    bool m_initialized;
-    bool m_running;	
-    double m_dt;
+    uint32_t    m_apiVersion{VK_API_VERSION_1_1};
+    uint32_t    m_minimumVersion{VK_API_VERSION_1_1};
+    uint32_t    m_maximumVersion{VK_API_VERSION_1_3};
+    bool        m_debug;		
+    bool        m_initialized;
+    bool        m_running;	
+    double      m_dt;
 };
 
 struct WindowState {
-    int 			            m_width{0};
-    int 			            m_height{0};
-    std::string 	            m_windowName{""};
-    glm::vec4 		            m_clearColor{0.45f, 0.55f, 0.60f, 1.00f};
-    bool 			            m_isMinimized{false};
-    bool 		                m_isInitialized{false};
-    SDL_Window*                 m_window{nullptr};
+    int 		  m_width{0};
+    int 		  m_height{0};
+    std::string   m_windowName{""};
+    glm::vec4 	  m_clearColor{0.45f, 0.55f, 0.60f, 1.00f};
+    bool 		  m_isMinimized{false};
+    bool 		  m_isInitialized{false};
+    SDL_Window*   m_window{nullptr};
 };
 
 struct VulkanState {
@@ -32,10 +32,12 @@ struct VulkanState {
 
     uint32_t 		m_apiVersionInstance{VK_API_VERSION_1_1};
     uint32_t 		m_apiVersionDevice{VK_API_VERSION_1_1};
+    uint32_t        m_apiVersion{VK_API_VERSION_1_1};
     VkInstance 		m_instance{VK_NULL_HANDLE};
     VkSurfaceKHR 	m_surface{VK_NULL_HANDLE};
     VmaAllocator 	m_vmaAllocator;
     VkDebugUtilsMessengerEXT m_debugMessenger;
+    VkAllocationCallbacks* m_pAllocator{nullptr};
     
     VkPhysicalDevice 			m_physicalDevice{VK_NULL_HANDLE};
     VkPhysicalDeviceFeatures 	m_physicalDeviceFeatures;
@@ -57,18 +59,18 @@ struct VulkanState {
     std::vector<vh::Semaphores> m_intermediateSemaphores;
     std::vector<VkFence>     m_fences;
 
-    vh::Buffer m_uniformBuffersPerFrame;
-    vh::Buffer m_uniformBuffersLights;
+    vh::Buffer          m_uniformBuffersPerFrame;
+    vh::Buffer          m_uniformBuffersLights;
     VkDescriptorSetLayout m_descriptorSetLayoutPerFrame;
-    vh::DescriptorSet m_descriptorSetPerFrame{0};
-    VkRenderPass m_renderPass;
-    VkDescriptorPool m_descriptorPool;
+    vh::DescriptorSet   m_descriptorSetPerFrame{0};
+    VkRenderPass        m_renderPass;
+    VkDescriptorPool    m_descriptorPool;
 
     std::vector<vh::Pipeline> m_pipelines;
 
-    uint32_t m_currentFrame = MAX_FRAMES_IN_FLIGHT - 1;
-    uint32_t m_imageIndex;
-    bool m_framebufferResized = false;
+    uint32_t    m_currentFrame = MAX_FRAMES_IN_FLIGHT - 1;
+    uint32_t    m_imageIndex;
+    bool        m_framebufferResized = false;
 };
 
 struct Object {
@@ -113,7 +115,16 @@ void Init( EngineState& engine, WindowState& window, VulkanState& vulkan ) {
 
     volkInitialize();
     vulkan.m_apiVersionInstance = engine.m_apiVersion;
-    vh::DevCreateInstance( ToCharPtr(vulkan.m_validationLayers), ToCharPtr(vulkan.m_instanceExtensions), engine.m_name, vulkan.m_apiVersionInstance, engine.m_debug, vulkan.m_instance);
+    vh::DevCreateInstance( {
+            .m_validationLayers = ToCharPtr(vulkan.m_validationLayers), 
+            .m_extensions = ToCharPtr(vulkan.m_instanceExtensions), 
+            .m_name = engine.m_name, 
+            .m_apiVersion = vulkan.m_apiVersionInstance, 
+            .m_debug = engine.m_debug, 
+            .m_instance = vulkan.m_instance 
+        }
+    );
+    
     volkLoadInstance(vulkan.m_instance);
 
     if (engine.m_debug) {
@@ -131,7 +142,8 @@ void Init( EngineState& engine, WindowState& window, VulkanState& vulkan ) {
         std::cout << "No device found with Vulkan API version at least 1." << VK_VERSION_MINOR(engine.m_minimumVersion) << "!\n";
         exit(1);
     }
-    engine.m_apiVersion = VK_MAKE_VERSION( VK_VERSION_MAJOR(engine.m_apiVersion), minor, 0);
+    vulkan.m_apiVersion = VK_MAKE_VERSION( VK_VERSION_MAJOR(engine.m_apiVersion), minor, 0);
+    engine.m_apiVersion = vulkan.m_apiVersion;
     vkGetPhysicalDeviceProperties(vulkan.m_physicalDevice, &vulkan.m_physicalDeviceProperties);
     vkGetPhysicalDeviceFeatures(vulkan.m_physicalDevice, &vulkan.m_physicalDeviceFeatures);
     vh::ImgPickDepthMapFormat(vulkan.m_physicalDevice, {VK_FORMAT_R32_UINT}, vulkan.m_depthMapFormat);
@@ -141,7 +153,7 @@ void Init( EngineState& engine, WindowState& window, VulkanState& vulkan ) {
     
     volkLoadDevice(vulkan.m_device);
     
-    vh::DevInitVMA(vulkan.m_instance, vulkan.m_physicalDevice, vulkan.m_device, engine.m_apiVersion, vulkan.m_vmaAllocator);  
+    vh::DevInitVMA(vulkan);  
     vh::DevCreateSwapChain(window.m_window, 
         vulkan.m_surface, vulkan.m_physicalDevice, vulkan.m_device, vulkan.m_swapChain);
     
@@ -282,6 +294,8 @@ void Step( EngineState& engine, WindowState& window, VulkanState& vulkan ) {
     }
 }
 
+template void vh::DevDestroyDebugUtilsMessengerEXT<VulkanState>(VulkanState&&);
+
 
 int main() {
     EngineState engine;
@@ -336,8 +350,9 @@ int main() {
     vkDestroyDevice(vulkan.m_device, nullptr);
     vkDestroySurfaceKHR(vulkan.m_instance, vulkan.m_surface, nullptr);
 
+
     if (engine.m_debug) {
-        vh::DevDestroyDebugUtilsMessengerEXT(vulkan.m_instance, vulkan.m_debugMessenger, nullptr);
+        vh::DevDestroyDebugUtilsMessengerEXT(vulkan);
     }
 
     vkDestroyInstance(vulkan.m_instance, nullptr);
