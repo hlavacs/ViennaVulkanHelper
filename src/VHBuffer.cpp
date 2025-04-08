@@ -142,7 +142,7 @@ namespace vh {
 
         BufCopyBuffer(device, graphicsQueue, commandPool, stagingBuffer, geometry.m_vertexBuffer, bufferSize);
 
-        BufDestroyBuffer(device, vmaAllocator, stagingBuffer, stagingBufferAllocation);
+        BufDestroyBuffer( {device, vmaAllocator, stagingBuffer, stagingBufferAllocation });
     }
 
 
@@ -179,7 +179,7 @@ namespace vh {
 
         BufCopyBuffer(device, graphicsQueue, commandPool, stagingBuffer, geometry.m_indexBuffer, bufferSize);
 
-        BufDestroyBuffer(device, vmaAllocator, stagingBuffer, stagingBufferAllocation);
+        BufDestroyBuffer( {device, vmaAllocator, stagingBuffer, stagingBufferAllocation});
     }
 
 

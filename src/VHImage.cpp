@@ -36,7 +36,7 @@ namespace vh {
         ImgTransitionImageLayout(device, graphicsQueue, commandPool, texture.m_mapImage, VK_FORMAT_R8G8B8A8_SRGB
             , VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-        BufDestroyBuffer(device, vmaAllocator, stagingBuffer, stagingBufferAllocation);
+        BufDestroyBuffer({device, vmaAllocator, stagingBuffer, stagingBufferAllocation});
     }
 
     void ImgCreateTextureImageView(VkDevice device, Map& texture) {

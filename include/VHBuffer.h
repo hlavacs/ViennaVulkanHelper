@@ -69,7 +69,7 @@ namespace vh {
 		const VkDevice 			m_device;
 		const VmaAllocator 		m_vmaAllocator;
 		const VkBuffer 			m_buffer;
-		const VmaAllocation& 	m_allocation
+		const VmaAllocation& 	m_allocation;
 	};
 
 	template<typename T = BufDestroyBufferinfo>
