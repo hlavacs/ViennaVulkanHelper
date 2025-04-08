@@ -9,10 +9,16 @@ namespace vh {
         VkBuffer stagingBuffer;
         VmaAllocation stagingBufferAllocation;
         VmaAllocationInfo allocInfo;
-        BufCreateBuffer( vmaAllocator, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT
-            , VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-            , VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT
-            , stagingBuffer, stagingBufferAllocation, &allocInfo);
+        BufCreateBuffer( {
+			vmaAllocator, 
+			imageSize, 
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
+			VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, 
+			stagingBuffer, 
+			stagingBufferAllocation, 
+			&allocInfo
+		});
 
         memcpy(allocInfo.pMappedData, pixels, imageSize);
 
@@ -230,9 +236,16 @@ namespace vh {
 		VmaAllocation stagingBufferAllocation;
         VmaAllocationInfo allocInfo;
 
-        BufCreateBuffer(allocator, (VkDeviceSize)imageSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT, 
-            VMA_MEMORY_USAGE_CPU_ONLY, VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
-            stagingBuffer, stagingBufferAllocation, &allocInfo);
+        BufCreateBuffer( {
+			allocator, 
+			(VkDeviceSize)imageSize, 
+			VK_BUFFER_USAGE_TRANSFER_DST_BIT, 
+			VMA_MEMORY_USAGE_CPU_ONLY, 
+			VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT,
+            stagingBuffer, 
+			stagingBufferAllocation, 
+			&allocInfo
+		});
 
 		ImgTransitionImageLayout(device, graphicsQueue, commandPool, image, format, 
 			//aspect, 1, 1, 

@@ -2,45 +2,10 @@
 
 namespace vh {
 
-    void BufCreateBuffer(VmaAllocator vmaAllocator, VkDeviceSize size, VkBufferUsageFlags usage
-        , VkMemoryPropertyFlags properties, VmaAllocationCreateFlags vmaFlags, VkBuffer& buffer
-        , VmaAllocation& allocation, VmaAllocationInfo* allocationInfo) {
-    
-        VkBufferCreateInfo bufferInfo = { VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO };
-        bufferInfo.size = size;
-        bufferInfo.usage = usage;
-        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        VmaAllocationCreateInfo allocInfo = {};
-        allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
-        allocInfo.flags = vmaFlags;
-        vmaCreateBuffer(vmaAllocator, &bufferInfo, &allocInfo, &buffer, &allocation, allocationInfo);
-    }
 
-    void BufCreateBuffers(VkPhysicalDevice physicalDevice, VkDevice device, VmaAllocator& vmaAllocator, 
-        VkBufferUsageFlags usage, VkDeviceSize bufferSize, Buffer &uniformBuffers) {
 
-            uniformBuffers.m_bufferSize = bufferSize;
-            uniformBuffers.m_uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-            uniformBuffers.m_uniformBuffersAllocation.resize(MAX_FRAMES_IN_FLIGHT);
-            uniformBuffers.m_uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
-    
-            for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-                VmaAllocationInfo allocInfo;
-                BufCreateBuffer( vmaAllocator, bufferSize, usage
-                    , VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT 
-                    , VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT
-                    , uniformBuffers.m_uniformBuffers[i] 
-                    , uniformBuffers.m_uniformBuffersAllocation[i]
-                    , &allocInfo);
-    
-                uniformBuffers.m_uniformBuffersMapped[i] = allocInfo.pMappedData;
-            }    
-    }
 
-    void BufDestroyBuffer(VkDevice device, VmaAllocator vmaAllocator, VkBuffer buffer, VmaAllocation& allocation) {
-        vmaDestroyBuffer(vmaAllocator, buffer, allocation);
-    }
 
     void BufDestroyBuffer2(VkDevice device, VmaAllocator vmaAllocator, Buffer buffers) {
 		for (size_t i = 0; i < buffers.m_uniformBuffers.size(); i++) {
@@ -152,17 +117,28 @@ namespace vh {
         VkBuffer stagingBuffer;
         VmaAllocation stagingBufferAllocation;
         VmaAllocationInfo allocInfo;
-        BufCreateBuffer( vmaAllocator, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT
-            , VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT 
-            , VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT
-            , stagingBuffer, stagingBufferAllocation, &allocInfo);
+        BufCreateBuffer( {
+			vmaAllocator, 
+			bufferSize, 
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
+			VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, 
+			stagingBuffer, 
+			stagingBufferAllocation, 
+			&allocInfo
+		});
 
 		geometry.m_verticesData.copyData( allocInfo.pMappedData );
 	
-        BufCreateBuffer( vmaAllocator, bufferSize
-            , VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
-            , VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 0, geometry.m_vertexBuffer
-            , geometry.m_vertexBufferAllocation);
+        BufCreateBuffer( {
+			vmaAllocator, 
+			bufferSize, 
+			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
+			0, 
+			geometry.m_vertexBuffer, 
+			geometry.m_vertexBufferAllocation
+		});
 
         BufCopyBuffer(device, graphicsQueue, commandPool, stagingBuffer, geometry.m_vertexBuffer, bufferSize);
 
@@ -178,17 +154,28 @@ namespace vh {
         VkBuffer stagingBuffer;
         VmaAllocation stagingBufferAllocation;
         VmaAllocationInfo allocInfo;
-        BufCreateBuffer( vmaAllocator, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT
-            , VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT 
-            , VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT
-            , stagingBuffer, stagingBufferAllocation, &allocInfo);
+        BufCreateBuffer( {
+			vmaAllocator, 
+			bufferSize, 
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
+			VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, 
+			stagingBuffer, 
+			stagingBufferAllocation, 
+			&allocInfo
+		});
 
 		memcpy(allocInfo.pMappedData, geometry.m_indices.data(), bufferSize);
 
-        BufCreateBuffer( vmaAllocator, bufferSize
-            , VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT
-            , VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 0
-            , geometry.m_indexBuffer, geometry.m_indexBufferAllocation);
+        BufCreateBuffer( {
+			vmaAllocator, 
+			bufferSize, 
+			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, 
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
+			0, 
+			geometry.m_indexBuffer, 
+			geometry.m_indexBufferAllocation
+		});
 
         BufCopyBuffer(device, graphicsQueue, commandPool, stagingBuffer, geometry.m_indexBuffer, bufferSize);
 

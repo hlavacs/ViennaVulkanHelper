@@ -4,7 +4,6 @@ set(SOURCE
 	main.cpp
 	helper.cpp
 	${PROJECT_SOURCE_DIR}/src/VHBuffer.cpp
-	${PROJECT_SOURCE_DIR}/src/VHCommand.cpp
 	${PROJECT_SOURCE_DIR}/src/VHImage.cpp
 	${PROJECT_SOURCE_DIR}/src/VHSync.cpp
 	${PROJECT_SOURCE_DIR}/src/VHInclude.cpp
