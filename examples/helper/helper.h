@@ -152,7 +152,7 @@ namespace vhe {
 
 	    std::vector<vh::Pipeline> m_pipelines;
 
-	    uint32_t    m_currentFrame = MAX_FRAMES_IN_FLIGHT - 1;
+	    uint32_t    m_currentFrame = MAXINFLIGHT - 1;
 	    uint32_t    m_imageIndex;
 	    bool        m_framebufferResized = false;
 	};
