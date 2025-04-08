@@ -296,8 +296,8 @@ namespace vh {
 		std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
 
         VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
-        auto vertShaderCode = ReadFile(info.m_vertShaderPath);
-        VkShaderModule vertShaderModule = RenCreateShaderModule(info.m_device, vertShaderCode);
+        auto vertShaderCode = vh::ReadFile(info.m_vertShaderPath);
+        VkShaderModule vertShaderModule = RenCreateShaderModule({info.m_device, vertShaderCode });
         vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
         vertShaderStageInfo.module = vertShaderModule;
@@ -308,8 +308,8 @@ namespace vh {
 		VkShaderModule fragShaderModule{};
 		if( !info.m_fragShaderPath.empty() ) {
 	        VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
-	        auto fragShaderCode = ReadFile(info.m_fragShaderPath);
-	        fragShaderModule = RenCreateShaderModule(info.m_device, fragShaderCode);
+	        auto fragShaderCode = vh::ReadFile(info.m_fragShaderPath);
+	        fragShaderModule = RenCreateShaderModule({info.m_device, fragShaderCode });
 	        fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	        fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 	        fragShaderStageInfo.module = fragShaderModule;
@@ -366,7 +366,8 @@ namespace vh {
             | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
         colorBlendAttachment.blendEnable = VK_FALSE;
 
-        if( info.m_blendAttachments.size() == 0) info.m_blendAttachments.push_back(colorBlendAttachment);
+		auto blendAttachments = info.m_blendAttachments;
+        if( blendAttachments.size() == 0) blendAttachments.push_back(colorBlendAttachment);
 
         VkPipelineColorBlendStateCreateInfo colorBlending{};
         colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;

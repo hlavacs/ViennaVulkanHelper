@@ -41,11 +41,32 @@ namespace std {
 
 namespace vh {
 
-	auto ToCharPtr(const std::vector<std::string>& vec) -> std::vector<const char*> { 
+	inline auto ToCharPtr(const std::vector<std::string>& vec) -> std::vector<const char*> { 
 	    std::vector<const char*> res;
 	    for( auto& str : vec) res.push_back(str.c_str());
 	    return res;
 	}
+
+	inline std::vector<char> ReadFile(const std::string& filename) {
+        std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+        if (!file.is_open()) {
+            std::cout << "failed to open file: " << filename << std::endl;
+            throw std::runtime_error("failed to open file!");
+        }
+
+        size_t fileSize = (size_t) file.tellg();
+        std::vector<char> buffer(fileSize);
+
+        file.seekg(0);
+        file.read(buffer.data(), fileSize);
+
+        file.close();
+
+        return buffer;
+    }
+
+
 
 	//--------------------------------------------------------------------
 	//Shader resources

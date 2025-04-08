@@ -33,17 +33,10 @@
 
 #include "VHVulkan.h"
 
-
 namespace vh {
-
-	std::vector<char> ReadFile(const std::string& filename);
-
 	void SetupImgui(SDL_Window* sdlWindow, VkInstance instance, VkPhysicalDevice physicalDevice, QueueFamilyIndices queueFamilies
 		, VkDevice device, VkQueue graphicsQueue, VkCommandPool commandPool, VkDescriptorPool descriptorPool
 		, VkRenderPass renderPass);
 
 	bool SDL3Init( std::string name, int width, int height, std::vector<std::string>& extensions );
-
-	void initVMA(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VmaAllocator& allocator);
-
 };

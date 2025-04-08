@@ -37,7 +37,7 @@ namespace vh
    		return vkGetInstanceProcAddr(volkInstance, name);
 	}
 
-    std::vector<char> ReadFile(const std::string& filename) {
+    /*std::vector<char> ReadFile(const std::string& filename) {
         std::ifstream file(filename, std::ios::ate | std::ios::binary);
 
         if (!file.is_open()) {
@@ -54,7 +54,7 @@ namespace vh
         file.close();
 
         return buffer;
-    }
+    }*/
 
 
     //------------------------------------------------------------------------
@@ -127,20 +127,7 @@ namespace vh
         return true;
     }
 
-    void initVMA(VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VmaAllocator& allocator) {
-        VmaVulkanFunctions vulkanFunctions = {};
-        vulkanFunctions.vkGetInstanceProcAddr = vkGetInstanceProcAddr;
-        vulkanFunctions.vkGetDeviceProcAddr = vkGetDeviceProcAddr;
 
-        VmaAllocatorCreateInfo allocatorCreateInfo = {};
-        allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
-        allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_2;
-        allocatorCreateInfo.physicalDevice = physicalDevice;
-        allocatorCreateInfo.device = device;
-        allocatorCreateInfo.instance = instance;
-        allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
-        vmaCreateAllocator(&allocatorCreateInfo, &allocator);
-    }
 
 } // namespace vh
 
