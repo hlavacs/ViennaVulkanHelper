@@ -349,11 +349,11 @@ namespace vh {
 	inline void DevRecreateSwapChain(T&& info) {
         int width = 0, height = 0;
         
-        SDL_GetWindowSize(info.m_window, &width, &height);
+        SDL_GetWindowSize((SDL_Window*)info.m_window, &width, &height);
         while (width == 0 || height == 0) {
             SDL_Event event;
             SDL_WaitEvent(&event);
-            SDL_GetWindowSize(info.m_window, &width, &height);
+            SDL_GetWindowSize((SDL_Window*)info.m_window, &width, &height);
         }
 
         vkDeviceWaitIdle(info.m_device);
@@ -442,10 +442,10 @@ namespace vh {
     struct DevCreateLogicalDeviceInfo {
 		const VkSurfaceKHR& 			m_surface;
 		const VkPhysicalDevice&			m_physicalDevice;
-		const QueueFamilyIndices& 		m_queueFamilies;
 		const std::vector<std::string>& m_validationLayers;
 		const std::vector<std::string>& m_deviceExtensions; 
 		const bool& m_debug; 
+		QueueFamilyIndices& m_queueFamilies;
 		VkDevice& 	m_device; 
 		VkQueue& 	m_graphicsQueue;
 		VkQueue& 	m_presentQueue;
@@ -501,7 +501,52 @@ namespace vh {
 		vkGetDeviceQueue(info.m_device, info.m_queueFamilies.graphicsFamily.value(), 0, &info.m_graphicsQueue);
 		vkGetDeviceQueue(info.m_device, info.m_queueFamilies.presentFamily.value(), 0, &info.m_presentQueue);
 	}
-	
+
+	//---------------------------------------------------------------------------------------------
+
+	inline auto DevChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) -> VkSurfaceFormatKHR {
+        for (const auto& availableFormat : availableFormats) {
+            if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+                return availableFormat;
+            }
+        }
+        return availableFormats[0];
+    }
+
+	//---------------------------------------------------------------------------------------------
+
+    inline auto DevChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) -> VkPresentModeKHR {
+        for (const auto& availablePresentMode : availablePresentModes) {
+            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
+                return availablePresentMode;
+            }
+        }
+        return VK_PRESENT_MODE_FIFO_KHR;    
+    }
+
+	//---------------------------------------------------------------------------------------------
+
+    inline auto DevChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, const SDL_Window* window) -> VkExtent2D {
+        if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
+            return capabilities.currentExtent;
+        } else {
+            int width, height;
+            SDL_GetWindowSize( (SDL_Window*)window, &width, &height);
+
+            VkExtent2D actualExtent = {
+                static_cast<uint32_t>(width),
+                static_cast<uint32_t>(height)
+            };
+
+            actualExtent.width  = std::clamp(actualExtent.width, capabilities.minImageExtent.width
+                , capabilities.maxImageExtent.width);
+            actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height
+                , capabilities.maxImageExtent.height);
+
+            return actualExtent;
+        }
+    }
+
 	//---------------------------------------------------------------------------------------------
 
     struct DevCreateSwapChainInfo {
@@ -514,7 +559,7 @@ namespace vh {
 
 	template<typename T = DevCreateSwapChainInfo>
 	inline void DevCreateSwapChain(T&& info) {
-        SwapChainSupportDetails swapChainSupport = DevQuerySwapChainSupport(info.m_physicalDevice, info.m_surface);
+        SwapChainSupportDetails swapChainSupport = DevQuerySwapChainSupport(info);
 
         VkSurfaceFormatKHR surfaceFormat = DevChooseSwapSurfaceFormat(swapChainSupport.formats);
         VkPresentModeKHR presentMode = DevChooseSwapPresentMode(swapChainSupport.presentModes);
@@ -581,50 +626,6 @@ namespace vh {
         }
     }
 
-	//---------------------------------------------------------------------------------------------
-
-	inline auto DevChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) -> VkSurfaceFormatKHR {
-        for (const auto& availableFormat : availableFormats) {
-            if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
-                return availableFormat;
-            }
-        }
-        return availableFormats[0];
-    }
-
-	//---------------------------------------------------------------------------------------------
-
-    inline auto DevChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes) -> VkPresentModeKHR {
-        for (const auto& availablePresentMode : availablePresentModes) {
-            if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-                return availablePresentMode;
-            }
-        }
-        return VK_PRESENT_MODE_FIFO_KHR;    
-    }
-
-	//---------------------------------------------------------------------------------------------
-
-    inline auto DevChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, SDL_Window* sdlWindow) -> VkExtent2D {
-        if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
-            return capabilities.currentExtent;
-        } else {
-            int width, height;
-            SDL_GetWindowSize(sdlWindow, &width, &height);
-
-            VkExtent2D actualExtent = {
-                static_cast<uint32_t>(width),
-                static_cast<uint32_t>(height)
-            };
-
-            actualExtent.width  = std::clamp(actualExtent.width, capabilities.minImageExtent.width
-                , capabilities.maxImageExtent.width);
-            actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height
-                , capabilities.maxImageExtent.height);
-
-            return actualExtent;
-        }
-    }
 
 
 } // namespace vh

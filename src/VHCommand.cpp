@@ -5,7 +5,7 @@
 namespace vh {
 
 	void ComCreateCommandPool(VkSurfaceKHR surface, VkPhysicalDevice physicalDevice, VkDevice device, VkCommandPool& commandPool) {
-        QueueFamilyIndices queueFamilyIndices = DevFindQueueFamilies(physicalDevice, surface);
+        QueueFamilyIndices queueFamilyIndices = DevFindQueueFamilies({ physicalDevice, surface });
 
         VkCommandPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;

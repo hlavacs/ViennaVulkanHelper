@@ -6,8 +6,6 @@
 
 namespace vhe {
 
-
-
 	void Init( EngineState& engine, WindowState& window, VulkanState& vulkan, SceneState& scene ) {
 	    vh::SDL3Init( std::string("Vienna Vulkan Helper"), 800, 600, vulkan.m_instanceExtensions);
 	    if (engine.m_debug) { vulkan.m_instanceExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); }
@@ -47,15 +45,15 @@ namespace vhe {
 	    engine.m_apiVersion = vulkan.m_apiVersion;
 	    vkGetPhysicalDeviceProperties(vulkan.m_physicalDevice, &vulkan.m_physicalDeviceProperties);
 	    vkGetPhysicalDeviceFeatures(vulkan.m_physicalDevice, &vulkan.m_physicalDeviceFeatures);
-	    vh::ImgPickDepthMapFormat(vulkan.m_physicalDevice, {VK_FORMAT_R32_UINT}, vulkan.m_depthMapFormat);
+	    vh::ImgPickDepthMapFormat(vulkan.m_physicalDevice, {VK_FORMAT_R32_UINT}, vulkan.m_depthFormat);
 
 	    vh::DevCreateLogicalDevice( {
-			.m_surface = vulkan.m_surface, 
+			.m_surface 			= vulkan.m_surface, 
 			.m_physicalDevice 	= vulkan.m_physicalDevice, 
-			.m_queueFamilies 	= vulkan.m_queueFamilies, 
 			.m_validationLayers = vulkan.m_validationLayers, 
 	        .m_deviceExtensions = vulkan.m_deviceExtensions, 
 			.m_debug 			= engine.m_debug, 
+			.m_queueFamilies 	= vulkan.m_queueFamilies, 
 			.m_device 			= vulkan.m_device, 
 			.m_graphicsQueue 	= vulkan.m_graphicsQueue, 
 			.m_presentQueue 	= vulkan.m_presentQueue
@@ -64,6 +62,7 @@ namespace vhe {
 	    volkLoadDevice(vulkan.m_device);
 	
 	    vh::DevInitVMA(vulkan);  
+
 	    vh::DevCreateSwapChain({
 			.m_window 			= window.m_window, 
 			.m_surface 			= vulkan.m_surface, 
@@ -74,24 +73,42 @@ namespace vhe {
 		
 	    vh::DevCreateImageViews(vulkan);
 
-	    vh::RenCreateRenderPass(vulkan.m_physicalDevice, vulkan.m_device, vulkan.m_swapChain, true, vulkan.m_renderPass);
+	    vh::RenCreateRenderPass({
+			.m_depthFormat 	= vulkan.m_depthFormat, 
+			.m_device 		= vulkan.m_device, 
+			.m_swapChain 	= vulkan.m_swapChain, 
+			.m_clear 		= true, 
+			.m_renderPass 	= vulkan.m_renderPass
+		});
 
-	    vh::RenCreateDescriptorSetLayout( vulkan.m_device, {}, vulkan.m_descriptorSetLayoutPerFrame );
+	    vh::RenCreateDescriptorSetLayout( {
+			.m_device = vulkan.m_device, 
+			.m_bindings = {}, 
+			.m_descriptorSetLayout = vulkan.m_descriptorSetLayoutPerFrame 
+		});
 		
 	    vulkan.m_pipelines.resize(1);
-	    vh::RenCreateGraphicsPipeline(vulkan.m_device, vulkan.m_renderPass, "shaders/shader.spv", "shaders/shader.spv", {}, {},
-	         { vulkan.m_descriptorSetLayoutPerFrame }, 
-	         {}, //spezialization constants
-	         {}, //push constants
-	         {}, //blend attachments
-	         vulkan.m_pipelines[0]);
+	    vh::RenCreateGraphicsPipeline({
+			.m_device = vulkan.m_device, 
+			.m_renderPass = vulkan.m_renderPass, 
+			.m_vertShaderPath = "shaders/shader.spv", 
+			.m_fragShaderPath = "shaders/shader.spv", 
+			.m_bindingDescription = {}, 
+			.m_attributeDescriptions = {},
+	        .m_descriptorSetLayouts = { vulkan.m_descriptorSetLayoutPerFrame }, 
+	        .m_specializationConstants = {}, 
+	        .m_pushConstantRanges = {}, 
+	        .m_blendAttachments = {}, 
+	        .m_graphicsPipeline = vulkan.m_pipelines[0]
+		});
 
 	    vulkan.m_commandPools.resize(MAX_FRAMES_IN_FLIGHT);
 	    for( int i=0; i<MAX_FRAMES_IN_FLIGHT; ++i) {
 	        vh::ComCreateCommandPool(vulkan.m_surface, vulkan.m_physicalDevice, vulkan.m_device, vulkan.m_commandPools[i]);
 	    }
 	
-	    vh::RenCreateDepthResources(vulkan.m_physicalDevice, vulkan.m_device, vulkan.m_vmaAllocator, vulkan.m_swapChain, vulkan.m_depthImage);
+	    vh::RenCreateDepthResources(vulkan);
+
 	    vh::ImgTransitionImageLayout2(vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_commandPools[0],
 	        vulkan.m_depthImage.m_depthImage, vulkan.m_swapChain.m_swapChainImageFormat, 
 	        VK_IMAGE_ASPECT_DEPTH_BIT, 1, 1, VK_IMAGE_LAYOUT_UNDEFINED , VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
@@ -102,8 +119,8 @@ namespace vhe {
 	            VK_IMAGE_LAYOUT_UNDEFINED , VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 	    }
 
-	    vh::RenCreateFramebuffers(vulkan.m_device, vulkan.m_swapChain, vulkan.m_depthImage, vulkan.m_renderPass);
-	    vh::RenCreateDescriptorPool(vulkan.m_device, 1000, vulkan.m_descriptorPool);
+	    vh::RenCreateFramebuffers(vulkan);
+	    vh::RenCreateDescriptorPool( { vulkan.m_device, 1000, vulkan.m_descriptorPool });
 	    vh::SynCreateSemaphores(vulkan.m_device, vulkan.m_imageAvailableSemaphores, vulkan.m_renderFinishedSemaphores, 3, vulkan.m_intermediateSemaphores);
 
 	    vh::SynCreateFences(vulkan.m_device, MAX_FRAMES_IN_FLIGHT, vulkan.m_fences);

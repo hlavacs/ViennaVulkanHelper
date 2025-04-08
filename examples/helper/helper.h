@@ -133,7 +133,7 @@ namespace vhe {
 	    VkQueue 		m_presentQueue{VK_NULL_HANDLE};
 	    vh::SwapChain 	m_swapChain;
 	    vh::DepthImage 	m_depthImage;
-	    VkFormat		m_depthMapFormat{VK_FORMAT_UNDEFINED};
+	    VkFormat		m_depthFormat{VK_FORMAT_UNDEFINED};
 
 	    std::vector<VkCommandPool> m_commandPools; //per frame in flight
 	    std::vector<VkCommandBuffer> m_commandBuffers; //collect command buffers to submit
