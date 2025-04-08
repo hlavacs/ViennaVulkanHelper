@@ -1,6 +1,7 @@
 set(TARGET helper)
 
 set(SOURCE 
+	main.cpp
 	helper.cpp
 	${PROJECT_SOURCE_DIR}/src/VHBuffer.cpp
 	${PROJECT_SOURCE_DIR}/src/VHCommand.cpp
