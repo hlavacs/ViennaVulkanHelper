@@ -66,9 +66,9 @@ namespace vh {
 
 	//---------------------------------------------------------------------------------------------
     struct BufDestroyBufferinfo {
-		const VkDevice 			m_device;
-		const VmaAllocator 		m_vmaAllocator;
-		const VkBuffer 			m_buffer;
+		const VkDevice& 		m_device;
+		const VmaAllocator& 	m_vmaAllocator;
+		const VkBuffer& 		m_buffer;
 		const VmaAllocation& 	m_allocation;
 	};
 
