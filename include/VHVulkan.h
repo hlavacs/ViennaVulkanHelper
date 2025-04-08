@@ -28,7 +28,6 @@ namespace std {
 	}
 }
 
-
 #define VHCHECKRESULT(x)          \
     {                             \
         VkResult retval = (x);    \
@@ -40,8 +39,13 @@ namespace std {
     }
 
 
-
 namespace vh {
+
+	auto ToCharPtr(const std::vector<std::string>& vec) -> std::vector<const char*> { 
+	    std::vector<const char*> res;
+	    for( auto& str : vec) res.push_back(str.c_str());
+	    return res;
+	}
 
 	//--------------------------------------------------------------------
 	//Shader resources

@@ -6,11 +6,7 @@
 
 namespace vhe {
 
-	auto ToCharPtr(const std::vector<std::string>& vec) -> std::vector<const char*> { 
-	    std::vector<const char*> res;
-	    for( auto& str : vec) res.push_back(str.c_str());
-	    return res;
-	}
+
 
 	void Init( EngineState& engine, WindowState& window, VulkanState& vulkan, SceneState& scene ) {
 	    vh::SDL3Init( std::string("Vienna Vulkan Helper"), 800, 600, vulkan.m_instanceExtensions);
@@ -19,12 +15,12 @@ namespace vhe {
 	    volkInitialize();
 	    vulkan.m_apiVersionInstance = engine.m_apiVersion;
 	    vh::DevCreateInstance( {
-	            .m_validationLayers = ToCharPtr(vulkan.m_validationLayers), 
-	            .m_extensions = ToCharPtr(vulkan.m_instanceExtensions), 
-	            .m_name = engine.m_name, 
-	            .m_apiVersion = vulkan.m_apiVersionInstance, 
-	            .m_debug = engine.m_debug, 
-	            .m_instance = vulkan.m_instance 
+	            .m_validationLayers 	= vulkan.m_validationLayers, 
+	            .m_instanceExtensions 	= vulkan.m_instanceExtensions, 
+	            .m_name 				= engine.m_name, 
+	            .m_apiVersion 			= vulkan.m_apiVersionInstance, 
+	            .m_debug 				= engine.m_debug, 
+	            .m_instance 			= vulkan.m_instance 
 	        }
 	    );
 	
@@ -39,8 +35,10 @@ namespace vhe {
 	    }
 
 	    vulkan.m_apiVersionDevice = engine.m_minimumVersion;
-	    vh::DevPickPhysicalDevice(vulkan.m_instance, vulkan.m_apiVersionDevice, ToCharPtr(vulkan.m_deviceExtensions), vulkan.m_surface, vulkan.m_physicalDevice);
-	    uint32_t minor = std::min( VK_VERSION_MINOR(vulkan.m_apiVersionDevice), VK_VERSION_MINOR(engine.m_apiVersion) );
+	    
+		vh::DevPickPhysicalDevice(vulkan);
+		
+		uint32_t minor = std::min( VK_VERSION_MINOR(vulkan.m_apiVersionDevice), VK_VERSION_MINOR(engine.m_apiVersion) );
 	    if( minor < VK_VERSION_MINOR(engine.m_minimumVersion) ) {
 	        std::cout << "No device found with Vulkan API version at least 1." << VK_VERSION_MINOR(engine.m_minimumVersion) << "!\n";
 	        exit(1);
@@ -51,16 +49,30 @@ namespace vhe {
 	    vkGetPhysicalDeviceFeatures(vulkan.m_physicalDevice, &vulkan.m_physicalDeviceFeatures);
 	    vh::ImgPickDepthMapFormat(vulkan.m_physicalDevice, {VK_FORMAT_R32_UINT}, vulkan.m_depthMapFormat);
 
-	    vh::DevCreateLogicalDevice(vulkan.m_surface, vulkan.m_physicalDevice, vulkan.m_queueFamilies, ToCharPtr(vulkan.m_validationLayers), 
-	        ToCharPtr(vulkan.m_deviceExtensions), engine.m_debug, vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_presentQueue);
+	    vh::DevCreateLogicalDevice( {
+			.m_surface = vulkan.m_surface, 
+			.m_physicalDevice 	= vulkan.m_physicalDevice, 
+			.m_queueFamilies 	= vulkan.m_queueFamilies, 
+			.m_validationLayers = vulkan.m_validationLayers, 
+	        .m_deviceExtensions = vulkan.m_deviceExtensions, 
+			.m_debug 			= engine.m_debug, 
+			.m_device 			= vulkan.m_device, 
+			.m_graphicsQueue 	= vulkan.m_graphicsQueue, 
+			.m_presentQueue 	= vulkan.m_presentQueue
+		});
 	
 	    volkLoadDevice(vulkan.m_device);
 	
 	    vh::DevInitVMA(vulkan);  
-	    vh::DevCreateSwapChain(window.m_window, 
-	        vulkan.m_surface, vulkan.m_physicalDevice, vulkan.m_device, vulkan.m_swapChain);
+	    vh::DevCreateSwapChain({
+			.m_window 			= window.m_window, 
+			.m_surface 			= vulkan.m_surface, 
+			.m_physicalDevice 	= vulkan.m_physicalDevice, 
+			.m_device 			= vulkan.m_device, 
+			.m_swapChain 		= vulkan.m_swapChain
+		});
 		
-	    vh::DevCreateImageViews(vulkan.m_device, vulkan.m_swapChain);
+	    vh::DevCreateImageViews(vulkan);
 
 	    vh::RenCreateRenderPass(vulkan.m_physicalDevice, vulkan.m_device, vulkan.m_swapChain, true, vulkan.m_renderPass);
 
@@ -115,9 +127,16 @@ namespace vhe {
 	        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
 	    if (result == VK_ERROR_OUT_OF_DATE_KHR ) {
-	        DevRecreateSwapChain( window.m_window, 
-	            vulkan.m_surface, vulkan.m_physicalDevice, vulkan.m_device, vulkan.m_vmaAllocator, 
-	            vulkan.m_swapChain, vulkan.m_depthImage, vulkan.m_renderPass);
+	        vh::DevRecreateSwapChain( {
+				.m_window 			= window.m_window, 
+	            .m_surface 			= vulkan.m_surface, 
+				.m_physicalDevice 	= vulkan.m_physicalDevice, 
+				.m_device 			= vulkan.m_device, 
+				.m_vmaAllocator 	= vulkan.m_vmaAllocator, 
+	            .m_swapChain 		= vulkan.m_swapChain, 
+				.m_depthImage 		= vulkan.m_depthImage, 
+				.m_renderPass 		= vulkan.m_renderPass
+			});
 
 	        //m_engine.SendMsg( MsgWindowSize{} );
 	    } else assert (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR);
@@ -155,9 +174,16 @@ namespace vhe {
 
 	    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || vulkan.m_framebufferResized) {
 	        vulkan.m_framebufferResized = false;
-	        vh::DevRecreateSwapChain(window.m_window, 
-	            vulkan.m_surface, vulkan.m_physicalDevice, vulkan.m_device, vulkan.m_vmaAllocator, 
-	            vulkan.m_swapChain, vulkan.m_depthImage, vulkan.m_renderPass);
+	        vh::DevRecreateSwapChain( {
+				.m_window = window.m_window, 
+	            .m_surface = vulkan.m_surface, 
+				.m_physicalDevice = vulkan.m_physicalDevice, 
+				.m_device = vulkan.m_device, 
+				.m_vmaAllocator = vulkan.m_vmaAllocator, 
+	            .m_swapChain = vulkan.m_swapChain, 
+				.m_depthImage = vulkan.m_depthImage, 
+				.m_renderPass = vulkan.m_renderPass
+			});
 
 	    } else assert(result == VK_SUCCESS);
 	    return true;
@@ -203,7 +229,7 @@ namespace vhe {
 
 		scene.m_root = nullptr; //clear all objects
 
-		vh::DevCleanupSwapChain(vulkan.m_device, vulkan.m_vmaAllocator, vulkan.m_swapChain, vulkan.m_depthImage);
+		vh::DevCleanupSwapChain(vulkan);
 	
 		for( auto& pipe : vulkan.m_pipelines) {
 			vkDestroyPipeline(vulkan.m_device, pipe.m_pipeline, nullptr);

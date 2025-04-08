@@ -5,7 +5,6 @@ set(SOURCE
 	helper.cpp
 	${PROJECT_SOURCE_DIR}/src/VHBuffer.cpp
 	${PROJECT_SOURCE_DIR}/src/VHCommand.cpp
-	${PROJECT_SOURCE_DIR}/src/VHDevice.cpp
 	${PROJECT_SOURCE_DIR}/src/VHImage.cpp
 	${PROJECT_SOURCE_DIR}/src/VHRender.cpp
 	${PROJECT_SOURCE_DIR}/src/VHSync.cpp
