@@ -51,20 +51,20 @@ namespace vh {
     void BufCopyBuffer(VkDevice device, VkQueue graphicsQueue, VkCommandPool commandPool, VkBuffer srcBuffer
         , VkBuffer dstBuffer, VkDeviceSize size) {
 
-        VkCommandBuffer commandBuffer = ComBeginSingleTimeCommands(device, commandPool);
+        VkCommandBuffer commandBuffer = ComBeginSingleTimeCommands({device, commandPool});
 
         VkBufferCopy copyRegion{};
         copyRegion.size = size;
         vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
 
-        ComEndSingleTimeCommands(device, graphicsQueue, commandPool, commandBuffer);
+        ComEndSingleTimeCommands({device, graphicsQueue, commandPool, commandBuffer});
     }
 
 
     void BufCopyBufferToImage(VkDevice device, VkQueue graphicsQueue, VkCommandPool commandPool
         , VkBuffer buffer, VkImage image, uint32_t width, uint32_t height) {
 
-        VkCommandBuffer commandBuffer = ComBeginSingleTimeCommands(device, commandPool);
+        VkCommandBuffer commandBuffer = ComBeginSingleTimeCommands({device, commandPool});
 
         VkBufferImageCopy region{};
         region.bufferOffset = 0;
@@ -83,7 +83,7 @@ namespace vh {
 
         vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
-        ComEndSingleTimeCommands(device, graphicsQueue, commandPool, commandBuffer);
+        ComEndSingleTimeCommands({device, graphicsQueue, commandPool, commandBuffer});
     }
 
 
@@ -102,7 +102,7 @@ namespace vh {
 	* \returns VK_SUCCESS or a Vulkan error code
 	*
 	*/
-	VkResult BufCopyImageToBuffer(VkDevice device, VkQueue graphicsQueue, VkCommandPool commandPool, 
+	void BufCopyImageToBuffer(VkDevice device, VkQueue graphicsQueue, VkCommandPool commandPool, 
         VkImage image, VkImageAspectFlagBits aspect, VkBuffer buffer, uint32_t layerCount, uint32_t width, uint32_t height)
 	{
 		std::vector<VkBufferImageCopy> regions;
@@ -119,7 +119,7 @@ namespace vh {
 		region.imageExtent = { width, height, 1 };
 		regions.push_back(region);
 
-		return BufCopyImageToBuffer(device, graphicsQueue, commandPool, image, buffer, regions, width, height);
+		BufCopyImageToBuffer(device, graphicsQueue, commandPool, image, buffer, regions, width, height);
 	}
 
 	/**
@@ -136,11 +136,11 @@ namespace vh {
 	* \returns VK_SUCCESS or a Vulkan error code
 	*
 	*/
-	VkResult BufCopyImageToBuffer(VkDevice device, VkQueue graphicsQueue, VkCommandPool commandPool, VkImage image, VkBuffer buffer, std::vector<VkBufferImageCopy> &regions, uint32_t width, uint32_t height)
+	void BufCopyImageToBuffer(VkDevice device, VkQueue graphicsQueue, VkCommandPool commandPool, VkImage image, VkBuffer buffer, std::vector<VkBufferImageCopy> &regions, uint32_t width, uint32_t height)
 	{
-		VkCommandBuffer commandBuffer = ComBeginSingleTimeCommands(device, commandPool);
+		VkCommandBuffer commandBuffer = ComBeginSingleTimeCommands({device, commandPool});
 		vkCmdCopyImageToBuffer(commandBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, buffer, (uint32_t)regions.size(), regions.data());
-		return ComEndSingleTimeCommands(device, graphicsQueue, commandPool, commandBuffer);
+		ComEndSingleTimeCommands({device, graphicsQueue, commandPool, commandBuffer});
 	}
 
 

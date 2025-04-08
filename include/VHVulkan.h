@@ -318,6 +318,6 @@ namespace vh {
 #include "VHBuffer.h"
 #include "VHImage.h"
 #include "VHDevice.h"
+#include "VHSync.h"
 #include "VHCommand.h"
 #include "VHRender.h"
-#include "VHSync.h"

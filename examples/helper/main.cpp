@@ -104,7 +104,12 @@ namespace vhe {
 
 	    vulkan.m_commandPools.resize(MAX_FRAMES_IN_FLIGHT);
 	    for( int i=0; i<MAX_FRAMES_IN_FLIGHT; ++i) {
-	        vh::ComCreateCommandPool(vulkan.m_surface, vulkan.m_physicalDevice, vulkan.m_device, vulkan.m_commandPools[i]);
+	        vh::ComCreateCommandPool( {
+				.m_surface = vulkan.m_surface, 
+				.m_physicalDevice = vulkan.m_physicalDevice, 
+				.m_device = vulkan.m_device, 
+				.m_commandPool = vulkan.m_commandPools[i]
+			});
 	    }
 	
 	    vh::RenCreateDepthResources(vulkan);
@@ -120,7 +125,11 @@ namespace vhe {
 	    }
 
 	    vh::RenCreateFramebuffers(vulkan);
-	    vh::RenCreateDescriptorPool( { vulkan.m_device, 1000, vulkan.m_descriptorPool });
+	    vh::RenCreateDescriptorPool( { 
+			.m_device = vulkan.m_device, 
+			.m_sizes = 1000, 
+			.m_descriptorPool = vulkan.m_descriptorPool 
+		});
 	    vh::SynCreateSemaphores(vulkan.m_device, vulkan.m_imageAvailableSemaphores, vulkan.m_renderFinishedSemaphores, 3, vulkan.m_intermediateSemaphores);
 
 	    vh::SynCreateFences(vulkan.m_device, MAX_FRAMES_IN_FLIGHT, vulkan.m_fences);
@@ -132,7 +141,7 @@ namespace vhe {
 
 	    vulkan.m_currentFrame = (vulkan.m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 	    vulkan.m_commandBuffers.resize(1);
-	    vh::ComCreateCommandBuffers(vulkan.m_device, vulkan.m_commandPools[vulkan.m_currentFrame], vulkan.m_commandBuffers);
+	    vh::ComCreateCommandBuffers({vulkan.m_device, vulkan.m_commandPools[vulkan.m_currentFrame], vulkan.m_commandBuffers});
 
 	    vkWaitForFences(vulkan.m_device, 1, &vulkan.m_fences[vulkan.m_currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -165,13 +174,20 @@ namespace vhe {
 
 	    vkResetCommandBuffer(vulkan.m_commandBuffers[vulkan.m_currentFrame],  0);
 
-	    vh::ComStartRecordCommandBuffer(vulkan.m_commandBuffers[vulkan.m_currentFrame], vulkan.m_imageIndex, 
-	        vulkan.m_swapChain, vulkan.m_renderPass, 
-	        true, 
-	        window.m_clearColor, 
-	        vulkan.m_currentFrame);
+		vh::ComBeginCommandBuffer({vulkan.m_commandBuffers[vulkan.m_currentFrame]});
 
-	    vh::ComEndRecordCommandBuffer(vulkan.m_commandBuffers[vulkan.m_currentFrame]);
+	    vh::ComBeginRenderPass({
+			.m_commandBuffer= vulkan.m_commandBuffers[vulkan.m_currentFrame], 
+			.m_imageIndex 	= vulkan.m_imageIndex, 
+	        .m_swapChain 	= vulkan.m_swapChain, 
+			.m_renderPass 	= vulkan.m_renderPass, 
+	        .m_clear 		= true, 
+	        .m_clearColor 	= window.m_clearColor, 
+	        .m_currentFrame = vulkan.m_currentFrame
+		});
+
+	    vh::ComEndRenderPass({vulkan.m_commandBuffers[vulkan.m_currentFrame]});
+	    vh::ComEndCommandBuffer({vulkan.m_commandBuffers[vulkan.m_currentFrame]});
 
 	    return true;
 	}
@@ -179,15 +195,18 @@ namespace vhe {
 	bool RenderNextFrame(EngineState& engine, WindowState& window, VulkanState& vulkan, SceneState& scene ) {
 	    if(window.m_isMinimized) return false;
 	
-	    vh::ComSubmitCommandBuffers(vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_commandBuffers, 
-	        vulkan.m_imageAvailableSemaphores, vulkan.m_renderFinishedSemaphores, vulkan.m_intermediateSemaphores, vulkan.m_fences, vulkan.m_currentFrame);
+	    vh::ComSubmitCommandBuffers(vulkan);
 
 	    vh::ImgTransitionImageLayout(vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_commandPools[0], 
 	        vulkan.m_swapChain.m_swapChainImages[vulkan.m_imageIndex], vulkan.m_swapChain.m_swapChainImageFormat, 
 	        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
-	    VkResult result = vh::ComPresentImage(vulkan.m_presentQueue, vulkan.m_swapChain, 
-	        vulkan.m_imageIndex, vulkan.m_renderFinishedSemaphores[vulkan.m_currentFrame]);
+	    VkResult result = vh::ComPresentImage( { 
+			.m_presentQueue = vulkan.m_presentQueue, 
+			.m_swapChain = vulkan.m_swapChain, 
+	        .m_imageIndex = vulkan.m_imageIndex, 
+			.m_signalSemaphore = vulkan.m_renderFinishedSemaphores[vulkan.m_currentFrame]
+		});
 
 	    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || vulkan.m_framebufferResized) {
 	        vulkan.m_framebufferResized = false;

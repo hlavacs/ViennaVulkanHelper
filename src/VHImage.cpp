@@ -141,7 +141,7 @@ namespace vh {
          , VkImageAspectFlags aspect, int numMipLevels, int numLayers
          , VkImageLayout oldLayout, VkImageLayout newLayout) {
 
-        VkCommandBuffer commandBuffer = ComBeginSingleTimeCommands(device, commandPool);
+        VkCommandBuffer commandBuffer = ComBeginSingleTimeCommands({device, commandPool});
 
         VkImageMemoryBarrier barrier{};
         barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -200,7 +200,7 @@ namespace vh {
               1, &barrier
         );
 
-        ComEndSingleTimeCommands(device, graphicsQueue, commandPool, commandBuffer);
+        ComEndSingleTimeCommands({device, graphicsQueue, commandPool, commandBuffer});
     }
 
 

@@ -151,9 +151,9 @@ namespace vh {
 	//---------------------------------------------------------------------------------------------
 
     struct RenCreateDescriptorSetInfo {
-		const VkDevice 					m_device;
+		const VkDevice&					m_device;
 		const VkDescriptorSetLayout& 	m_descriptorSetLayouts;
-		const VkDescriptorPool 			m_descriptorPool;
+		const VkDescriptorPool&			m_descriptorPool;
 		DescriptorSet& 					m_descriptorSet;
 	};
 
@@ -209,9 +209,9 @@ namespace vh {
 	//---------------------------------------------------------------------------------------------
 
     struct RenUpdateDescriptorSetTextureInfo { 
-		VkDevice 		m_device;
+		VkDevice& 		m_device;
 		Map& 			m_texture;
-		size_t 			m_binding;
+		size_t&			m_binding;
 		DescriptorSet& 	m_descriptorSet;
 	};
 
@@ -429,10 +429,10 @@ namespace vh {
 	//---------------------------------------------------------------------------------------------
 
     struct RenCreateFramebuffersInfo {
-		VkDevice& 		m_device;
-		SwapChain& 		m_swapChain; 
-		DepthImage& 	m_depthImage;
-		VkRenderPass& 	m_renderPass;
+		const VkDevice& 	m_device;
+		const DepthImage& 	m_depthImage;
+		const VkRenderPass& m_renderPass;
+		SwapChain& 			m_swapChain; 
 	};
 
 	template<typename T = RenCreateFramebuffersInfo>
