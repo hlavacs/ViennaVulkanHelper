@@ -3,6 +3,16 @@
 
 namespace vh {
 
+	struct ComEndSingleTimeCommandsInfo {
+		const VkDevice& m_device;
+		const VkQueue& m_graphicsQueue;
+		const VkCommandPool& m_commandPool;
+		const VkCommandBuffer& m_commandBuffer;
+	};
+
+	template<typename T = ComEndSingleTimeCommandsInfo>
+	void ComEndSingleTimeCommands(T&& info);
+	
 	//---------------------------------------------------------------------------------------------
 
     struct BufCreateBufferInfo { 
@@ -78,29 +88,232 @@ namespace vh {
     }
 
 	//---------------------------------------------------------------------------------------------
-    void BufDestroyBuffer2(VkDevice device, VmaAllocator vmaAllocator, Buffer buffers);
+
+    struct BufDestroyBuffer2Info {
+		const VkDevice& 	m_device;
+		const VmaAllocator& m_vmaAllocator;
+		const Buffer& 		m_buffers;
+	};
+
+	template<typename T = BufDestroyBuffer2Info>
+	inline void BufDestroyBuffer2(T&& info) {
+		for (size_t i = 0; i < info.m_buffers.m_uniformBuffers.size(); i++) {
+			vmaDestroyBuffer(info.m_vmaAllocator, info.m_buffers.m_uniformBuffers[i], info.m_buffers.m_uniformBuffersAllocation[i]);
+		}
+	}
+	//---------------------------------------------------------------------------------------------
+    
+	struct BufCopyBufferInfo {
+		const VkDevice& 		m_device;
+		const VkQueue& 			m_graphicsQueue;
+		const VkCommandPool& 	m_commandPool;
+		const VkBuffer& 		m_srcBuffer;
+		const VkBuffer& 		m_dstBuffer;
+		const VkDeviceSize& 	m_size;
+	};
+
+	template<typename T = BufCopyBufferInfo>
+	inline void BufCopyBuffer(T&& info) {
+        VkCommandBuffer commandBuffer = ComBeginSingleTimeCommands(info);
+        VkBufferCopy copyRegion{};
+        copyRegion.size = info.m_size;
+        vkCmdCopyBuffer( commandBuffer, info.m_srcBuffer, info.m_dstBuffer, 1, &copyRegion );
+        ComEndSingleTimeCommands({info.m_device, info.m_graphicsQueue, info.m_commandPool, commandBuffer});
+    }
 
 	//---------------------------------------------------------------------------------------------
-    void BufCopyBuffer(VkDevice device, VkQueue graphicsQueue, VkCommandPool commandPool, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+
+    struct BufCopyBufferToImageInfo {
+		const VkDevice& 		m_device;
+		const VkQueue& 			m_graphicsQueue;
+		const VkCommandPool& 	m_commandPool;
+		const VkBuffer& 		m_buffer;
+		const VkImage& 			m_image;
+		const uint32_t& 		m_width;
+		const uint32_t& 		m_height;
+	};
+
+	template<typename T = BufCopyBufferToImageInfo>
+	void BufCopyBufferToImage(T&& info) {
+		VkCommandBuffer commandBuffer = ComBeginSingleTimeCommands(info);
+		VkBufferImageCopy region{};
+		region.bufferOffset = 0;
+		region.bufferRowLength = 0;
+		region.bufferImageHeight = 0;
+		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		region.imageSubresource.mipLevel = 0;
+		region.imageSubresource.baseArrayLayer = 0;
+		region.imageSubresource.layerCount = 1;
+		region.imageOffset = {0, 0, 0};
+		region.imageExtent = {info.m_width, info.m_height, 1};
+
+		vkCmdCopyBufferToImage(commandBuffer, info.m_buffer, info.m_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+
+		ComEndSingleTimeCommands({
+			info.m_device, 
+			info.m_graphicsQueue, 
+			info.m_commandPool, 
+			commandBuffer
+		});
+	}
+	
+	//---------------------------------------------------------------------------------------------
+
+	struct BufCopyImageToBufferInfo {
+		const VkDevice& 		m_device;
+		const VkQueue& 			m_graphicsQueue;
+		const VkCommandPool& 	m_commandPool;
+		const VkImage& 			m_image;
+		const VkBuffer& 		m_buffer;
+		const std::vector<VkBufferImageCopy>& m_regions;
+		const uint32_t& 		m_width;
+		const uint32_t& 		m_height;
+	};
+
+	template<typename T = BufCopyImageToBufferInfo>
+	inline void BufCopyImageToBuffer(T&& info) {
+		VkCommandBuffer commandBuffer = ComBeginSingleTimeCommands(info);
+		vkCmdCopyImageToBuffer(commandBuffer, info.m_image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, info.m_buffer, 
+			(uint32_t)info.m_regions.size(), info.m_regions.data());
+		ComEndSingleTimeCommands({info.m_device, info.m_graphicsQueue, info.m_commandPool, commandBuffer});
+	}
+	
+	//---------------------------------------------------------------------------------------------
+    
+	struct BufCopyImageToBuffer2Info {
+		const VkDevice& 		m_device;
+		const VkQueue& 			m_graphicsQueue;
+		const VkCommandPool& 	m_commandPool;
+		const VkImage& 			m_image;
+		const VkImageAspectFlagBits& m_aspect;
+		const VkBuffer& 		m_buffer;
+		const uint32_t& 		m_layerCount;
+		const uint32_t& 		m_width;
+		const uint32_t& 		m_height;
+	};
+
+	template<typename T = BufCopyImageToBuffer2Info>
+	inline void BufCopyImageToBuffer2(T&& info) {
+		std::vector<VkBufferImageCopy> regions;
+
+		VkBufferImageCopy region = {};
+		region.bufferOffset = 0;
+		region.bufferRowLength = 0;
+		region.bufferImageHeight = 0;
+		region.imageSubresource.aspectMask = info.m_aspect;
+		region.imageSubresource.mipLevel = 0;
+		region.imageSubresource.baseArrayLayer = 0;
+		region.imageSubresource.layerCount = info.m_layerCount;
+		region.imageOffset = { 0, 0, 0 };
+		region.imageExtent = { info.m_width, info.m_height, 1 };
+		regions.push_back(region);
+
+		BufCopyImageToBuffer({
+			info.m_device, 
+			info.m_graphicsQueue, 
+			info.m_commandPool, 
+			info.m_image, 
+			info.m_buffer, 
+			regions, 
+			info.m_width, 
+			info.m_height
+		});
+	}
+
 
 	//---------------------------------------------------------------------------------------------
-    void BufCopyBufferToImage(VkDevice device, VkQueue graphicsQueue, VkCommandPool commandPool
-        , VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
+    struct BufCreateVertexBufferInfo { 
+		const VkPhysicalDevice& m_physicalDevice;
+		const VkDevice& 		m_device;
+		const VmaAllocator& 	m_vmaAllocator;
+        const VkQueue&			m_graphicsQueue;
+		const VkCommandPool& 	m_commandPool;
+		const Mesh& 			m_mesh;
+	};
+
+	template<typename T = BufCreateVertexBufferInfo>
+	void BufCreateVertexBuffer(T&& info) {
+
+		VkDeviceSize bufferSize = info.m_mesh.m_verticesData.getSize();
+
+		VkBuffer stagingBuffer;
+		VmaAllocation stagingBufferAllocation;
+		VmaAllocationInfo allocInfo;
+		BufCreateBuffer( {
+			.m_vmaAllocator = info.m_vmaAllocator, 
+			.m_size = bufferSize, 
+			.m_usageFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+			.m_properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
+			.m_vmaFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, 
+			.m_buffer = stagingBuffer, 
+			.m_allocation = stagingBufferAllocation, 
+			.m_allocationInfo = &allocInfo
+		});
+
+		info.m_mesh.m_verticesData.copyData( allocInfo.pMappedData );
+	
+		BufCreateBuffer( {
+			.m_vmaAllocator = info.m_vmaAllocator, 
+			.m_size = bufferSize, 
+			.m_usageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 
+			.m_properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
+			.m_vmaFlags = 0, 
+			.m_buffer = info.m_mesh.m_vertexBuffer, 
+			.m_allocation = info.m_mesh.m_vertexBufferAllocation
+		});
+
+		BufCopyBuffer( {info.m_device, info.m_graphicsQueue, info.m_commandPool, stagingBuffer, info.m_mesh.m_vertexBuffer, bufferSize });
+
+		BufDestroyBuffer( {info.m_device, info.m_vmaAllocator, stagingBuffer, stagingBufferAllocation });
+	}
+	
 	//---------------------------------------------------------------------------------------------
-    void BufCopyImageToBuffer(VkDevice device, VkQueue graphicsQueue, VkCommandPool commandPool, VkImage image, VkImageAspectFlagBits aspect, VkBuffer buffer, uint32_t layerCount, uint32_t width, uint32_t height);
 
-	//---------------------------------------------------------------------------------------------
-	void BufCopyImageToBuffer(VkDevice device, VkQueue graphicsQueue, VkCommandPool commandPool, VkImage image, VkBuffer buffer, std::vector<VkBufferImageCopy> &regions, uint32_t width, uint32_t height);
+    struct BufCreateIndexBufferinfo { 
+		const VkPhysicalDevice& m_physicalDevice;
+		const VkDevice& 		m_device;
+		const VmaAllocator& 	m_vmaAllocator;
+		const VkQueue& 			m_graphicsQueue;
+		const VkCommandPool& 	m_commandPool;
+		const Mesh& 			m_mesh;
+	};
 
-	//---------------------------------------------------------------------------------------------
-    void BufCreateVertexBuffer(VkPhysicalDevice physicalDevice, VkDevice device, VmaAllocator vmaAllocator
-        , VkQueue graphicsQueue, VkCommandPool commandPool, Mesh& geometry);
+	template<typename T = BufCreateIndexBufferinfo>
+	void BufCreateIndexBuffer(T&& info) {
 
-	//---------------------------------------------------------------------------------------------
-    void BufCreateIndexBuffer(VkPhysicalDevice physicalDevice, VkDevice device, VmaAllocator vmaAllocator
-        , VkQueue graphicsQueue, VkCommandPool commandPool, Mesh& geometry);
+		VkDeviceSize bufferSize = sizeof(info.m_mesh.m_indices[0]) * info.m_mesh.m_indices.size();
 
-  
+		VkBuffer stagingBuffer;
+		VmaAllocation stagingBufferAllocation;
+		VmaAllocationInfo allocInfo;
+		BufCreateBuffer( {
+			.m_vmaAllocator = info.m_vmaAllocator, 
+			.m_size = bufferSize, 
+			.m_usageFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+			.m_properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
+			.m_vmaFlags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, 
+			.m_buffer = stagingBuffer, 
+			.m_allocation = stagingBufferAllocation, 
+			.m_allocationInfo = &allocInfo
+		});
+
+		memcpy(allocInfo.pMappedData, info.m_mesh.m_indices.data(), bufferSize);
+
+		BufCreateBuffer( {
+			.m_vmaAllocator = info.m_vmaAllocator, 
+			.m_size = bufferSize, 
+			.m_usageFlags = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, 
+			.m_properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
+			.m_vmaFlags = 0, 
+			.m_buffer = info.m_mesh.m_indexBuffer, 
+			.m_allocation = info.m_mesh.m_indexBufferAllocation
+		});
+
+		BufCopyBuffer( {info.m_device, info.m_graphicsQueue, info.m_commandPool, stagingBuffer, info.m_mesh.m_indexBuffer, bufferSize} );
+
+		BufDestroyBuffer( {info.m_device, info.m_vmaAllocator, stagingBuffer, stagingBufferAllocation});
+	}
+	
 
 }; // namespace vh

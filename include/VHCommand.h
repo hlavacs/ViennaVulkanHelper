@@ -29,7 +29,7 @@ namespace vh {
 
     struct ComBeginSingleTimeCommandsInfo {
 		const VkDevice& m_device;
-		VkCommandPool& 	m_commandPool;
+		const VkCommandPool& 	m_commandPool;
 	};
 
 	template<typename T = ComBeginSingleTimeCommandsInfo>
@@ -53,15 +53,9 @@ namespace vh {
     }
 
 	//---------------------------------------------------------------------------------------------
-
-    struct ComEndSingleTimeCommandsInfo {
-		const VkDevice& m_device;
-		const VkQueue& m_graphicsQueue;
-		VkCommandPool& m_commandPool;
-		VkCommandBuffer& m_commandBuffer;
-	};
-    
-	template<typename T = ComEndSingleTimeCommandsInfo>
+	//struct defined in VHBuffer.h
+	
+	template<typename T>
 	inline void ComEndSingleTimeCommands(T&& info) {
         vkEndCommandBuffer(info.m_commandBuffer);
 
@@ -80,7 +74,7 @@ namespace vh {
 
 	struct ComCreateCommandBuffersInfo { 
 		const VkDevice& 				m_device;
-		VkCommandPool& 					m_commandPool;
+		const VkCommandPool& 			m_commandPool;
 		std::vector<VkCommandBuffer>& 	m_commandBuffers;
 	};
 
@@ -99,11 +93,10 @@ namespace vh {
         }
     }
 
-
 	//---------------------------------------------------------------------------------------------
 
 	struct ComBeginCommandBufferInfo {
-		VkCommandBuffer& m_commandBuffer;
+		const VkCommandBuffer& m_commandBuffer;
 	};
 
 	template<typename T = ComBeginCommandBufferInfo>
@@ -120,7 +113,7 @@ namespace vh {
 	//---------------------------------------------------------------------------------------------
 
 	struct ComBeginRenderPassInfo {
-		VkCommandBuffer& 	m_commandBuffer;
+		const VkCommandBuffer& 	m_commandBuffer;
 		const uint32_t& 	m_imageIndex;
 		const SwapChain& 	m_swapChain;
 		const VkRenderPass& m_renderPass;
@@ -154,8 +147,8 @@ namespace vh {
 	//---------------------------------------------------------------------------------------------
 
     struct ComBindPipelineInfo { 
-		VkCommandBuffer& 				m_commandBuffer;
-		Pipeline& 						m_graphicsPipeline;
+		const VkCommandBuffer& 				m_commandBuffer;
+		const Pipeline& 						m_graphicsPipeline;
 		const uint32_t&					m_imageIndex;
         const SwapChain& 				m_swapChain;
 		const VkRenderPass& 			m_renderPass; 
@@ -197,7 +190,7 @@ namespace vh {
 	//---------------------------------------------------------------------------------------------
 
 	struct ComEndCommandBufferInfo {
-		VkCommandBuffer& m_commandBuffer;
+		const VkCommandBuffer& m_commandBuffer;
 	};
 
 	template<typename T = ComEndCommandBufferInfo>
@@ -210,7 +203,7 @@ namespace vh {
 	//---------------------------------------------------------------------------------------------
 
     struct ComEndRenderPassInfo {
-		VkCommandBuffer& m_commandBuffer;
+		const VkCommandBuffer& m_commandBuffer;
 	};
 
 	template<typename T = ComEndRenderPassInfo>

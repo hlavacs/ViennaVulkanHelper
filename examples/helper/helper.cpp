@@ -9,7 +9,7 @@ namespace vhe {
         vh::ImgDestroyImage(m_vulkan.m_device, m_vulkan.m_vmaAllocator, m_texture.m_mapImage, m_texture.m_mapImageAllocation);
         vh::BufDestroyBuffer({m_vulkan.m_device, m_vulkan.m_vmaAllocator, m_mesh.m_indexBuffer, m_mesh.m_indexBufferAllocation});
         vh::BufDestroyBuffer({m_vulkan.m_device, m_vulkan.m_vmaAllocator, m_mesh.m_vertexBuffer, m_mesh.m_vertexBufferAllocation});
-        vh::BufDestroyBuffer2(m_vulkan.m_device, m_vulkan.m_vmaAllocator, m_uniformBuffers);
+        vh::BufDestroyBuffer2({m_vulkan.m_device, m_vulkan.m_vmaAllocator, m_uniformBuffers});
     };
     
     auto VertexData::Type() -> std::string{

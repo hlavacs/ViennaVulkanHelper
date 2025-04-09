@@ -30,8 +30,8 @@ namespace vh {
         ImgTransitionImageLayout(device, graphicsQueue, commandPool, texture.m_mapImage, VK_FORMAT_R8G8B8A8_SRGB
                 , VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
     
-        BufCopyBufferToImage(device, graphicsQueue, commandPool, stagingBuffer, texture.m_mapImage
-                 , static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+        BufCopyBufferToImage({device, graphicsQueue, commandPool, stagingBuffer, texture.m_mapImage
+                 , static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight)});
 
         ImgTransitionImageLayout(device, graphicsQueue, commandPool, texture.m_mapImage, VK_FORMAT_R8G8B8A8_SRGB
             , VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -251,7 +251,7 @@ namespace vh {
 			//aspect, 1, 1, 
 			layout, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
-		BufCopyImageToBuffer(device, graphicsQueue, commandPool, image, aspect, stagingBuffer, 1, width, height);
+		BufCopyImageToBuffer2({device, graphicsQueue, commandPool, image, aspect, stagingBuffer, 1, width, height});
 
 		ImgTransitionImageLayout(device, graphicsQueue, commandPool, image, format, 
 			//aspect, 1, 1, 
