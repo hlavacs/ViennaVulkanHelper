@@ -185,7 +185,7 @@ namespace vh {
 		const VkQueue& 			m_graphicsQueue;
 		const VkCommandPool& 	m_commandPool;
 		const VkImage& 			m_image;
-		const VkImageAspectFlagBits& m_aspect;
+		const VkImageAspectFlagBits& m_aspectMask;
 		const VkBuffer& 		m_buffer;
 		const uint32_t& 		m_layerCount;
 		const uint32_t& 		m_width;
@@ -200,7 +200,7 @@ namespace vh {
 		region.bufferOffset = 0;
 		region.bufferRowLength = 0;
 		region.bufferImageHeight = 0;
-		region.imageSubresource.aspectMask = info.m_aspect;
+		region.imageSubresource.aspectMask = info.m_aspectMask;
 		region.imageSubresource.mipLevel = 0;
 		region.imageSubresource.baseArrayLayer = 0;
 		region.imageSubresource.layerCount = info.m_layerCount;

@@ -45,7 +45,11 @@ namespace vhe {
 	    engine.m_apiVersion = vulkan.m_apiVersion;
 	    vkGetPhysicalDeviceProperties(vulkan.m_physicalDevice, &vulkan.m_physicalDeviceProperties);
 	    vkGetPhysicalDeviceFeatures(vulkan.m_physicalDevice, &vulkan.m_physicalDeviceFeatures);
-	    vh::ImgPickDepthMapFormat(vulkan.m_physicalDevice, {VK_FORMAT_R32_UINT}, vulkan.m_depthFormat);
+
+	    vulkan.m_depthFormat = vh::ImgPickDepthMapFormat( {
+				.m_physicalDevice = vulkan.m_physicalDevice, 
+				.m_depthFormats = {VK_FORMAT_R32_UINT}
+			});
 
 	    vh::DevCreateLogicalDevice( {
 			.m_surface 			= vulkan.m_surface, 
@@ -114,14 +118,29 @@ namespace vhe {
 	
 	    vh::RenCreateDepthResources(vulkan);
 
-	    vh::ImgTransitionImageLayout2(vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_commandPools[0],
-	        vulkan.m_depthImage.m_depthImage, vulkan.m_swapChain.m_swapChainImageFormat, 
-	        VK_IMAGE_ASPECT_DEPTH_BIT, 1, 1, VK_IMAGE_LAYOUT_UNDEFINED , VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
+	    vh::ImgTransitionImageLayout({
+			.m_device = vulkan.m_device, 
+			.m_graphicsQueue = vulkan.m_graphicsQueue, 
+			.m_commandPool = vulkan.m_commandPools[0],
+	        .m_image = vulkan.m_depthImage.m_depthImage, 
+			.m_format = vulkan.m_swapChain.m_swapChainImageFormat, 
+	        .m_aspect = VK_IMAGE_ASPECT_DEPTH_BIT, 
+			.m_mipLevels = 1, 
+			.m_layers = 1, 
+			.m_oldLayout = VK_IMAGE_LAYOUT_UNDEFINED, 
+			.m_newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+		});
 		
 	    for( auto image : vulkan.m_swapChain.m_swapChainImages ) {
-	        vh::ImgTransitionImageLayout(vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_commandPools[0],
-	            image, vulkan.m_swapChain.m_swapChainImageFormat, 
-	            VK_IMAGE_LAYOUT_UNDEFINED , VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	        vh::ImgTransitionImageLayout2({
+				.m_device = vulkan.m_device, 
+				.m_graphicsQueue = vulkan.m_graphicsQueue, 
+				.m_commandPool = vulkan.m_commandPools[0],
+	            .m_image = image, 
+				.m_format = vulkan.m_swapChain.m_swapChainImageFormat, 
+	            .m_oldLayout = VK_IMAGE_LAYOUT_UNDEFINED, 
+				.m_newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+			});
 	    }
 
 	    vh::RenCreateFramebuffers(vulkan);
@@ -148,9 +167,15 @@ namespace vhe {
 	    VkResult result = vkAcquireNextImageKHR(vulkan.m_device, vulkan.m_swapChain.m_swapChain, UINT64_MAX,
 	                        vulkan.m_imageAvailableSemaphores[vulkan.m_currentFrame], VK_NULL_HANDLE, &vulkan.m_imageIndex);
 
-	    vh::ImgTransitionImageLayout(vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_commandPools[0], 
-	        vulkan.m_swapChain.m_swapChainImages[vulkan.m_imageIndex], vulkan.m_swapChain.m_swapChainImageFormat, 
-	        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+	    vh::ImgTransitionImageLayout2({
+			.m_device 			= vulkan.m_device, 
+			.m_graphicsQueue 	= vulkan.m_graphicsQueue, 
+			.m_commandPool 		= vulkan.m_commandPools[0], 
+	        .m_image 			= vulkan.m_swapChain.m_swapChainImages[vulkan.m_imageIndex], 
+			.m_format 			= vulkan.m_swapChain.m_swapChainImageFormat, 
+	        .m_oldLayout 		= VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 
+			.m_newLayout 		= VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+		});
 
 	    if (result == VK_ERROR_OUT_OF_DATE_KHR ) {
 	        vh::DevRecreateSwapChain( {
@@ -197,9 +222,15 @@ namespace vhe {
 	
 	    vh::ComSubmitCommandBuffers(vulkan);
 
-	    vh::ImgTransitionImageLayout(vulkan.m_device, vulkan.m_graphicsQueue, vulkan.m_commandPools[0], 
-	        vulkan.m_swapChain.m_swapChainImages[vulkan.m_imageIndex], vulkan.m_swapChain.m_swapChainImageFormat, 
-	        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+	    vh::ImgTransitionImageLayout2({
+			.m_device = vulkan.m_device, 
+			.m_graphicsQueue = vulkan.m_graphicsQueue, 
+			.m_commandPool = vulkan.m_commandPools[0], 
+	        .m_image = vulkan.m_swapChain.m_swapChainImages[vulkan.m_imageIndex], 
+			.m_format = vulkan.m_swapChain.m_swapChainImageFormat, 
+	        .m_oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 
+			.m_newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+		});
 
 	    VkResult result = vh::ComPresentImage( { 
 			.m_presentQueue = vulkan.m_presentQueue, 

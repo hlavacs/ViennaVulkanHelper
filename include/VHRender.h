@@ -510,15 +510,29 @@ namespace vh {
 
 	template<typename T = RenCreateDepthResourcesInfo>
 	inline void RenCreateDepthResources(T&& info) {
-        VkFormat depthFormat = RenFindDepthFormat(info.m_physicalDevice);
+        const VkFormat depthFormat = RenFindDepthFormat(info.m_physicalDevice);
 
-        ImgCreateImage(info.m_physicalDevice, info.m_device, info.m_vmaAllocator, info.m_swapChain.m_swapChainExtent.width
-            , info.m_swapChain.m_swapChainExtent.height, depthFormat
-            , VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
-            , VK_IMAGE_LAYOUT_UNDEFINED //  Do NOT CHANGE
-            , VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, info.m_depthImage.m_depthImage, info.m_depthImage.m_depthImageAllocation);
-            
-			info.m_depthImage.m_depthImageView = ImgCreateImageView(info.m_device, info.m_depthImage.m_depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+        ImgCreateImage2({
+			info.m_physicalDevice, 
+			info.m_device, 
+			info.m_vmaAllocator, 
+			info.m_swapChain.m_swapChainExtent.width, 
+			info.m_swapChain.m_swapChainExtent.height, 
+			depthFormat, 
+			VK_IMAGE_TILING_OPTIMAL, 
+			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, 
+			VK_IMAGE_LAYOUT_UNDEFINED, //  Do NOT CHANGE
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
+			info.m_depthImage.m_depthImage, 
+			info.m_depthImage.m_depthImageAllocation
+		});
+        
+		info.m_depthImage.m_depthImageView = ImgCreateImageView2( {
+			.m_device = info.m_device, 
+			.m_image  = info.m_depthImage.m_depthImage, 
+			.m_format = depthFormat, 
+			.m_aspects = VK_IMAGE_ASPECT_DEPTH_BIT
+		});
     }
 
 	//---------------------------------------------------------------------------------------------

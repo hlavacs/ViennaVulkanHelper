@@ -319,7 +319,12 @@ namespace vh {
     inline void DevCleanupSwapChain(T&& info) {
         vkDestroyImageView(info.m_device, info.m_depthImage.m_depthImageView, nullptr);
 
-        ImgDestroyImage(info.m_device, info.m_vmaAllocator, info.m_depthImage.m_depthImage, info.m_depthImage.m_depthImageAllocation);
+        ImgDestroyImage({
+			.m_device = info.m_device, 
+			.m_vmaAllocator = info.m_vmaAllocator, 
+			.m_image = info.m_depthImage.m_depthImage, 
+			.m_imageAllocation = info.m_depthImage.m_depthImageAllocation
+		});
 
         for (auto framebuffer : info.m_swapChain.m_swapChainFramebuffers) {
             vkDestroyFramebuffer(info.m_device, framebuffer, nullptr);
@@ -620,9 +625,12 @@ namespace vh {
         info.m_swapChain.m_swapChainImageViews.resize(info.m_swapChain.m_swapChainImages.size());
 
         for (uint32_t i = 0; i < info.m_swapChain.m_swapChainImages.size(); i++) {
-            info.m_swapChain.m_swapChainImageViews[i] 
-				= ImgCreateImageView(info.m_device, info.m_swapChain.m_swapChainImages[i]
-                	, info.m_swapChain.m_swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
+            info.m_swapChain.m_swapChainImageViews[i] = ImgCreateImageView2({
+					.m_device = info.m_device, 
+					.m_image = info.m_swapChain.m_swapChainImages[i], 
+					.m_format = info.m_swapChain.m_swapChainImageFormat, 
+					.m_aspects = VK_IMAGE_ASPECT_COLOR_BIT
+				});
         }
     }
 
