@@ -283,13 +283,23 @@ namespace vhe {
 	            case SDL_EVENT_WINDOW_RESTORED:
 	                window.m_isMinimized = false;
 	                break;
+				default: {
+						for( auto& system : engine.m_systems ) system->Event(engine, window, vulkan, scene, event);
+					}
+					break;
 	        }
 	    }
+
+		for( auto& system : engine.m_systems ) system->Update(engine, window, vulkan, scene);
+
 	    if(!window.m_isMinimized) {
 	        ImGui_ImplVulkan_NewFrame();
 	        ImGui_ImplSDL3_NewFrame();
 	        ImGui::NewFrame();
-	        ImGui::ShowDemoWindow(); // Show demo window! :)
+
+			for( auto& system : engine.m_systems ) system->ImGUI(engine, window, vulkan, scene);
+
+			ImGui::ShowDemoWindow(); // Show demo window! :)
 
 	        PrepareNextFrame(engine, window, vulkan, scene);
 	        RecordNextFrame(engine, window, vulkan, scene);
@@ -339,6 +349,30 @@ namespace vhe {
 }; //namespace vhe
 
 
+class MyGame : public vhe::System {
+	public:
+	MyGame() : System() {};
+	~MyGame() {};
+	
+	virtual void Init(vhe::EngineState& engine, vhe::WindowState& window, vhe::VulkanState& vulkan, vhe::SceneState& scene) {
+		//do something
+	}
+
+	virtual void Event(vhe::EngineState& engine, vhe::WindowState& window, vhe::VulkanState& vulkan, vhe::SceneState& scene, SDL_Event event ) {
+		//do something
+	};
+
+	virtual void Update(vhe::EngineState& engine, vhe::WindowState& window, vhe::VulkanState& vulkan, vhe::SceneState& scene ) {
+		//do something
+	};
+
+	virtual void ImGUI(vhe::EngineState& engine, vhe::WindowState& window, vhe::VulkanState& vulkan, vhe::SceneState& scene ) {
+		//do something
+	};
+
+};
+
+
 int main() {
 	using namespace vhe; 
 
@@ -358,7 +392,12 @@ int main() {
         vulkan.m_deviceExtensions.push_back("VK_KHR_portability_subset");
     #endif
 
+	std::vector<std::unique_ptr<System>> systems;
+	engine.m_systems.emplace_back(std::move(std::make_unique<MyGame>()));
+
     Init(engine, window, vulkan, scene);
+
+	for( auto& system : engine.m_systems ) system->Init(engine, window, vulkan, scene);
 
     auto prev = std::chrono::high_resolution_clock::now();
     while (engine.m_running) {

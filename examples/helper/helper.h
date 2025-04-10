@@ -87,6 +87,7 @@ namespace vhe {
 	    VmaAllocation           m_indexBufferAllocation;
 	};
 
+	class System; 
 
 	 struct EngineState {
 	    const std::string m_name;
@@ -95,7 +96,8 @@ namespace vhe {
 	    uint32_t    m_maximumVersion{VK_API_VERSION_1_3};
 	    bool        m_debug;		
 	    bool        m_initialized;
-	    bool        m_running;	
+	    bool        m_running;
+		std::vector<std::unique_ptr<System>> m_systems;
 	    double      m_dt;
 	};
 
@@ -179,6 +181,16 @@ namespace vhe {
 	    std::shared_ptr<Object> m_root;
 	    std::map<std::string, std::shared_ptr<Object>> m_map{ {"root", {m_root}} };
 
+	};
+
+	class System {
+		public:
+		System() {}
+		virtual ~System() {}
+		virtual void Init(EngineState& engine, WindowState& window, VulkanState& vulkan, SceneState& scene) = 0;
+		virtual void Event(EngineState& engine, WindowState& window, VulkanState& vulkan, SceneState& scene, SDL_Event event ) = 0;
+		virtual void Update(EngineState& engine, WindowState& window, VulkanState& vulkan, SceneState& scene ) = 0;
+		virtual void ImGUI(EngineState& engine, WindowState& window, VulkanState& vulkan, SceneState& scene) = 0;
 	};
 
 }; //namespace vhe
