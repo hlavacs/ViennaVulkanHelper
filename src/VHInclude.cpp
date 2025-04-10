@@ -25,12 +25,7 @@
 
 namespace vh
 {
-    const uint32_t WIDTH = 800;
-    const uint32_t HEIGHT = 600;
-    
-    const std::string MODEL_PATH   = "assets/models/viking_room.obj";
-    const std::string TEXTURE_PATH = "assets/textures/viking_room.png";
-    
+
 	extern VkInstance volkInstance;
 
 	auto LoadVolk(const char* name, void* context) {

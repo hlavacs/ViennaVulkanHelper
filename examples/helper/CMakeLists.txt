@@ -3,7 +3,6 @@ set(TARGET helper)
 set(SOURCE 
 	main.cpp
 	helper.cpp
-	${PROJECT_SOURCE_DIR}/src/VHSync.cpp
 	${PROJECT_SOURCE_DIR}/src/VHInclude.cpp
 )
 

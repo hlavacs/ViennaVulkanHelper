@@ -149,9 +149,16 @@ namespace vhe {
 			.m_sizes = 1000, 
 			.m_descriptorPool = vulkan.m_descriptorPool 
 		});
-	    vh::SynCreateSemaphores(vulkan.m_device, vulkan.m_imageAvailableSemaphores, vulkan.m_renderFinishedSemaphores, 3, vulkan.m_intermediateSemaphores);
+	
+	    vh::SynCreateSemaphores({
+			.m_device 					= vulkan.m_device, 
+			.m_imageAvailableSemaphores = vulkan.m_imageAvailableSemaphores, 
+			.m_renderFinishedSemaphores = vulkan.m_renderFinishedSemaphores, 
+			.m_size 					= 3, 
+			.m_intermediateSemaphores = vulkan.m_intermediateSemaphores
+		});
 
-	    vh::SynCreateFences(vulkan.m_device, MAX_FRAMES_IN_FLIGHT, vulkan.m_fences);
+	    vh::SynCreateFences( { vulkan.m_device, MAX_FRAMES_IN_FLIGHT, vulkan.m_fences });
 	}
 
 
@@ -312,8 +319,8 @@ namespace vhe {
 		}
 	
 		vkDestroyRenderPass(vulkan.m_device, vulkan.m_renderPass, nullptr);
-		vh::SynDestroyFences(vulkan.m_device, vulkan.m_fences);
-		vh::SynDestroySemaphores(vulkan.m_device, vulkan.m_imageAvailableSemaphores, vulkan.m_renderFinishedSemaphores, vulkan.m_intermediateSemaphores);
+		vh::SynDestroyFences(vulkan);
+		vh::SynDestroySemaphores(vulkan);
 		vmaDestroyAllocator(vulkan.m_vmaAllocator);
 		vkDestroyDevice(vulkan.m_device, nullptr);
 		vkDestroySurfaceKHR(vulkan.m_instance, vulkan.m_surface, nullptr);

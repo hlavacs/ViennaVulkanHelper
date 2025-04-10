@@ -257,8 +257,13 @@ namespace vh {
 
 		size_t size = info.m_commandBuffers.size();
 		if( size > info.m_intermediateSemaphores.size() ) {
-			vh::SynCreateSemaphores(info.m_device, 
-				info.m_imageAvailableSemaphores, info.m_renderFinishedSemaphores, size, info.m_intermediateSemaphores);
+			vh::SynCreateSemaphores({
+				.m_device = info.m_device, 
+				.m_imageAvailableSemaphores = info.m_imageAvailableSemaphores, 
+				.m_renderFinishedSemaphores = info.m_renderFinishedSemaphores, 
+				.m_size 					= size,
+				.m_intermediateSemaphores 	= info.m_intermediateSemaphores 
+			});
 		}
 
 		vkResetFences(info.m_device, 1, &info.m_fences[info.m_currentFrame]);
