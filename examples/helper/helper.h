@@ -183,14 +183,23 @@ namespace vhe {
 
 	};
 
+	struct State {
+		EngineState engine;
+	    WindowState window;
+	    VulkanState vulkan;
+	    SceneState scene;
+	};
+
 	class System {
 		public:
 		System() {}
 		virtual ~System() {}
-		virtual void Init(EngineState& engine, WindowState& window, VulkanState& vulkan, SceneState& scene) = 0;
-		virtual void Event(EngineState& engine, WindowState& window, VulkanState& vulkan, SceneState& scene, SDL_Event event ) = 0;
-		virtual void Update(EngineState& engine, WindowState& window, VulkanState& vulkan, SceneState& scene ) = 0;
-		virtual void ImGUI(EngineState& engine, WindowState& window, VulkanState& vulkan, SceneState& scene) = 0;
+		virtual void Init(State& state) = 0;
+		virtual void FrameStart(State& state) = 0;
+		virtual void Event(State& state) = 0;
+		virtual void Update(State& state) = 0;
+		virtual void ImGUI(State& state) = 0;
+		virtual void FrameEnd(State& state) = 0;
 	};
 
 }; //namespace vhe

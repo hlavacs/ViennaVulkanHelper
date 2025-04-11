@@ -6,124 +6,124 @@
 
 namespace vhe {
 
-	void Init( EngineState& engine, WindowState& window, VulkanState& vulkan, SceneState& scene ) {
-	    vh::SDL3Init( std::string("Vienna Vulkan Helper"), 800, 600, vulkan.m_instanceExtensions);
-	    if (engine.m_debug) { vulkan.m_instanceExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); }
+	void Init( State& state ) {
+	    vh::SDL3Init( std::string("Vienna Vulkan Helper"), 800, 600, state.vulkan.m_instanceExtensions);
+	    if (state.engine.m_debug) { state.vulkan.m_instanceExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); }
 
 	    volkInitialize();
-	    vulkan.m_apiVersionInstance = engine.m_apiVersion;
+	    state.vulkan.m_apiVersionInstance = state.engine.m_apiVersion;
 	    vh::DevCreateInstance( {
-	            .m_validationLayers 	= vulkan.m_validationLayers, 
-	            .m_instanceExtensions 	= vulkan.m_instanceExtensions, 
-	            .m_name 				= engine.m_name, 
-	            .m_apiVersion 			= vulkan.m_apiVersionInstance, 
-	            .m_debug 				= engine.m_debug, 
-	            .m_instance 			= vulkan.m_instance 
+	            .m_validationLayers 	= state.vulkan.m_validationLayers, 
+	            .m_instanceExtensions 	= state.vulkan.m_instanceExtensions, 
+	            .m_name 				= state.engine.m_name, 
+	            .m_apiVersion 			= state.vulkan.m_apiVersionInstance, 
+	            .m_debug 				= state.engine.m_debug, 
+	            .m_instance 			= state.vulkan.m_instance 
 	        }
 	    );
 	
-	    volkLoadInstance(vulkan.m_instance);
+	    volkLoadInstance(state.vulkan.m_instance);
 
-	    if (engine.m_debug) {
-	        vh::DevSetupDebugMessenger(vulkan.m_instance, vulkan.m_debugMessenger);
+	    if (state.engine.m_debug) {
+	        vh::DevSetupDebugMessenger(state.vulkan.m_instance, state.vulkan.m_debugMessenger);
 	    }
 
-	    if (SDL_Vulkan_CreateSurface(window.m_window, vulkan.m_instance, nullptr, &vulkan.m_surface) == 0) {
+	    if (SDL_Vulkan_CreateSurface(state.window.m_window, state.vulkan.m_instance, nullptr, &state.vulkan.m_surface) == 0) {
 	        printf("Failed to create Vulkan surface.\n");
 	    }
 
-	    vulkan.m_apiVersionDevice = engine.m_minimumVersion;
+	    state.vulkan.m_apiVersionDevice = state.engine.m_minimumVersion;
 	    
-		vh::DevPickPhysicalDevice(vulkan);
+		vh::DevPickPhysicalDevice(state.vulkan);
 		
-		uint32_t minor = std::min( VK_VERSION_MINOR(vulkan.m_apiVersionDevice), VK_VERSION_MINOR(engine.m_apiVersion) );
-	    if( minor < VK_VERSION_MINOR(engine.m_minimumVersion) ) {
-	        std::cout << "No device found with Vulkan API version at least 1." << VK_VERSION_MINOR(engine.m_minimumVersion) << "!\n";
+		uint32_t minor = std::min( VK_VERSION_MINOR(state.vulkan.m_apiVersionDevice), VK_VERSION_MINOR(state.engine.m_apiVersion) );
+	    if( minor < VK_VERSION_MINOR(state.engine.m_minimumVersion) ) {
+	        std::cout << "No device found with Vulkan API version at least 1." << VK_VERSION_MINOR(state.engine.m_minimumVersion) << "!\n";
 	        exit(1);
 	    }
-	    vulkan.m_apiVersion = VK_MAKE_VERSION( VK_VERSION_MAJOR(engine.m_apiVersion), minor, 0);
-	    engine.m_apiVersion = vulkan.m_apiVersion;
-	    vkGetPhysicalDeviceProperties(vulkan.m_physicalDevice, &vulkan.m_physicalDeviceProperties);
-	    vkGetPhysicalDeviceFeatures(vulkan.m_physicalDevice, &vulkan.m_physicalDeviceFeatures);
+	    state.vulkan.m_apiVersion = VK_MAKE_VERSION( VK_VERSION_MAJOR(state.engine.m_apiVersion), minor, 0);
+	    state.engine.m_apiVersion = state.vulkan.m_apiVersion;
+	    vkGetPhysicalDeviceProperties(state.vulkan.m_physicalDevice, &state.vulkan.m_physicalDeviceProperties);
+	    vkGetPhysicalDeviceFeatures(state.vulkan.m_physicalDevice, &state.vulkan.m_physicalDeviceFeatures);
 
-	    vulkan.m_depthFormat = vh::ImgPickDepthMapFormat( {
-				.m_physicalDevice = vulkan.m_physicalDevice, 
+	    state.vulkan.m_depthFormat = vh::ImgPickDepthMapFormat( {
+				.m_physicalDevice = state.vulkan.m_physicalDevice, 
 				.m_depthFormats = {VK_FORMAT_R32_UINT}
 			});
 
 	    vh::DevCreateLogicalDevice( {
-			.m_surface 			= vulkan.m_surface, 
-			.m_physicalDevice 	= vulkan.m_physicalDevice, 
-			.m_validationLayers = vulkan.m_validationLayers, 
-	        .m_deviceExtensions = vulkan.m_deviceExtensions, 
-			.m_debug 			= engine.m_debug, 
-			.m_queueFamilies 	= vulkan.m_queueFamilies, 
-			.m_device 			= vulkan.m_device, 
-			.m_graphicsQueue 	= vulkan.m_graphicsQueue, 
-			.m_presentQueue 	= vulkan.m_presentQueue
+			.m_surface 			= state.vulkan.m_surface, 
+			.m_physicalDevice 	= state.vulkan.m_physicalDevice, 
+			.m_validationLayers = state.vulkan.m_validationLayers, 
+	        .m_deviceExtensions = state.vulkan.m_deviceExtensions, 
+			.m_debug 			= state.engine.m_debug, 
+			.m_queueFamilies 	= state.vulkan.m_queueFamilies, 
+			.m_device 			= state.vulkan.m_device, 
+			.m_graphicsQueue 	= state.vulkan.m_graphicsQueue, 
+			.m_presentQueue 	= state.vulkan.m_presentQueue
 		});
 	
-	    volkLoadDevice(vulkan.m_device);
+	    volkLoadDevice(state.vulkan.m_device);
 	
-	    vh::DevInitVMA(vulkan);  
+	    vh::DevInitVMA(state.vulkan);  
 
 	    vh::DevCreateSwapChain({
-			.m_window 			= window.m_window, 
-			.m_surface 			= vulkan.m_surface, 
-			.m_physicalDevice 	= vulkan.m_physicalDevice, 
-			.m_device 			= vulkan.m_device, 
-			.m_swapChain 		= vulkan.m_swapChain
+			.m_window 			= state.window.m_window, 
+			.m_surface 			= state.vulkan.m_surface, 
+			.m_physicalDevice 	= state.vulkan.m_physicalDevice, 
+			.m_device 			= state.vulkan.m_device, 
+			.m_swapChain 		= state.vulkan.m_swapChain
 		});
 		
-	    vh::DevCreateImageViews(vulkan);
+	    vh::DevCreateImageViews(state.vulkan);
 
 	    vh::RenCreateRenderPass({
-			.m_depthFormat 	= vulkan.m_depthFormat, 
-			.m_device 		= vulkan.m_device, 
-			.m_swapChain 	= vulkan.m_swapChain, 
+			.m_depthFormat 	= state.vulkan.m_depthFormat, 
+			.m_device 		= state.vulkan.m_device, 
+			.m_swapChain 	= state.vulkan.m_swapChain, 
 			.m_clear 		= true, 
-			.m_renderPass 	= vulkan.m_renderPass
+			.m_renderPass 	= state.vulkan.m_renderPass
 		});
 
 	    vh::RenCreateDescriptorSetLayout( {
-			.m_device = vulkan.m_device, 
+			.m_device = state.vulkan.m_device, 
 			.m_bindings = {}, 
-			.m_descriptorSetLayout = vulkan.m_descriptorSetLayoutPerFrame 
+			.m_descriptorSetLayout = state.vulkan.m_descriptorSetLayoutPerFrame 
 		});
 		
-	    vulkan.m_pipelines.resize(1);
+	    state.vulkan.m_pipelines.resize(1);
 	    vh::RenCreateGraphicsPipeline({
-			.m_device = vulkan.m_device, 
-			.m_renderPass = vulkan.m_renderPass, 
+			.m_device = state.vulkan.m_device, 
+			.m_renderPass = state.vulkan.m_renderPass, 
 			.m_vertShaderPath = "shaders/shader.spv", 
 			.m_fragShaderPath = "shaders/shader.spv", 
 			.m_bindingDescription = {}, 
 			.m_attributeDescriptions = {},
-	        .m_descriptorSetLayouts = { vulkan.m_descriptorSetLayoutPerFrame }, 
+	        .m_descriptorSetLayouts = { state.vulkan.m_descriptorSetLayoutPerFrame }, 
 	        .m_specializationConstants = {}, 
 	        .m_pushConstantRanges = {}, 
 	        .m_blendAttachments = {}, 
-	        .m_graphicsPipeline = vulkan.m_pipelines[0]
+	        .m_graphicsPipeline = state.vulkan.m_pipelines[0]
 		});
 
-	    vulkan.m_commandPools.resize(MAX_FRAMES_IN_FLIGHT);
+	    state.vulkan.m_commandPools.resize(MAX_FRAMES_IN_FLIGHT);
 	    for( int i=0; i<MAX_FRAMES_IN_FLIGHT; ++i) {
 	        vh::ComCreateCommandPool( {
-				.m_surface = vulkan.m_surface, 
-				.m_physicalDevice = vulkan.m_physicalDevice, 
-				.m_device = vulkan.m_device, 
-				.m_commandPool = vulkan.m_commandPools[i]
+				.m_surface = state.vulkan.m_surface, 
+				.m_physicalDevice = state.vulkan.m_physicalDevice, 
+				.m_device = state.vulkan.m_device, 
+				.m_commandPool = state.vulkan.m_commandPools[i]
 			});
 	    }
 	
-	    vh::RenCreateDepthResources(vulkan);
+	    vh::RenCreateDepthResources(state.vulkan);
 
 	    vh::ImgTransitionImageLayout({
-			.m_device = vulkan.m_device, 
-			.m_graphicsQueue = vulkan.m_graphicsQueue, 
-			.m_commandPool = vulkan.m_commandPools[0],
-	        .m_image = vulkan.m_depthImage.m_depthImage, 
-			.m_format = vulkan.m_swapChain.m_swapChainImageFormat, 
+			.m_device = state.vulkan.m_device, 
+			.m_graphicsQueue = state.vulkan.m_graphicsQueue, 
+			.m_commandPool = state.vulkan.m_commandPools[0],
+	        .m_image = state.vulkan.m_depthImage.m_depthImage, 
+			.m_format = state.vulkan.m_swapChain.m_swapChainImageFormat, 
 	        .m_aspect = VK_IMAGE_ASPECT_DEPTH_BIT, 
 			.m_mipLevels = 1, 
 			.m_layers = 1, 
@@ -131,69 +131,69 @@ namespace vhe {
 			.m_newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
 		});
 		
-	    for( auto image : vulkan.m_swapChain.m_swapChainImages ) {
+	    for( auto image : state.vulkan.m_swapChain.m_swapChainImages ) {
 	        vh::ImgTransitionImageLayout2({
-				.m_device = vulkan.m_device, 
-				.m_graphicsQueue = vulkan.m_graphicsQueue, 
-				.m_commandPool = vulkan.m_commandPools[0],
+				.m_device = state.vulkan.m_device, 
+				.m_graphicsQueue = state.vulkan.m_graphicsQueue, 
+				.m_commandPool = state.vulkan.m_commandPools[0],
 	            .m_image = image, 
-				.m_format = vulkan.m_swapChain.m_swapChainImageFormat, 
+				.m_format = state.vulkan.m_swapChain.m_swapChainImageFormat, 
 	            .m_oldLayout = VK_IMAGE_LAYOUT_UNDEFINED, 
 				.m_newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
 			});
 	    }
 
-	    vh::RenCreateFramebuffers(vulkan);
+	    vh::RenCreateFramebuffers(state.vulkan);
 	    vh::RenCreateDescriptorPool( { 
-			.m_device = vulkan.m_device, 
+			.m_device = state.vulkan.m_device, 
 			.m_sizes = 1000, 
-			.m_descriptorPool = vulkan.m_descriptorPool 
+			.m_descriptorPool = state.vulkan.m_descriptorPool 
 		});
 	
 	    vh::SynCreateSemaphores({
-			.m_device 					= vulkan.m_device, 
-			.m_imageAvailableSemaphores = vulkan.m_imageAvailableSemaphores, 
-			.m_renderFinishedSemaphores = vulkan.m_renderFinishedSemaphores, 
+			.m_device 					= state.vulkan.m_device, 
+			.m_imageAvailableSemaphores = state.vulkan.m_imageAvailableSemaphores, 
+			.m_renderFinishedSemaphores = state.vulkan.m_renderFinishedSemaphores, 
 			.m_size 					= 3, 
-			.m_intermediateSemaphores = vulkan.m_intermediateSemaphores
+			.m_intermediateSemaphores = state.vulkan.m_intermediateSemaphores
 		});
 
-	    vh::SynCreateFences( { vulkan.m_device, MAX_FRAMES_IN_FLIGHT, vulkan.m_fences });
+	    vh::SynCreateFences( { state.vulkan.m_device, MAX_FRAMES_IN_FLIGHT, state.vulkan.m_fences });
 	}
 
 
-	bool PrepareNextFrame(EngineState& engine, WindowState& window, VulkanState& vulkan, SceneState& scene ) {
-	    if(window.m_isMinimized) return false;
+	bool PrepareNextFrame(State& state) {
+	    if(state.window.m_isMinimized) return false;
 
-	    vulkan.m_currentFrame = (vulkan.m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
-	    vulkan.m_commandBuffers.resize(1);
-	    vh::ComCreateCommandBuffers({vulkan.m_device, vulkan.m_commandPools[vulkan.m_currentFrame], vulkan.m_commandBuffers});
+	    state.vulkan.m_currentFrame = (state.vulkan.m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+	    state.vulkan.m_commandBuffers.resize(1);
+	    vh::ComCreateCommandBuffers({state.vulkan.m_device, state.vulkan.m_commandPools[state.vulkan.m_currentFrame], state.vulkan.m_commandBuffers});
 
-	    vkWaitForFences(vulkan.m_device, 1, &vulkan.m_fences[vulkan.m_currentFrame], VK_TRUE, UINT64_MAX);
+	    vkWaitForFences(state.vulkan.m_device, 1, &state.vulkan.m_fences[state.vulkan.m_currentFrame], VK_TRUE, UINT64_MAX);
 
-	    VkResult result = vkAcquireNextImageKHR(vulkan.m_device, vulkan.m_swapChain.m_swapChain, UINT64_MAX,
-	                        vulkan.m_imageAvailableSemaphores[vulkan.m_currentFrame], VK_NULL_HANDLE, &vulkan.m_imageIndex);
+	    VkResult result = vkAcquireNextImageKHR(state.vulkan.m_device, state.vulkan.m_swapChain.m_swapChain, UINT64_MAX,
+	                        state.vulkan.m_imageAvailableSemaphores[state.vulkan.m_currentFrame], VK_NULL_HANDLE, &state.vulkan.m_imageIndex);
 
 	    vh::ImgTransitionImageLayout2({
-			.m_device 			= vulkan.m_device, 
-			.m_graphicsQueue 	= vulkan.m_graphicsQueue, 
-			.m_commandPool 		= vulkan.m_commandPools[0], 
-	        .m_image 			= vulkan.m_swapChain.m_swapChainImages[vulkan.m_imageIndex], 
-			.m_format 			= vulkan.m_swapChain.m_swapChainImageFormat, 
+			.m_device 			= state.vulkan.m_device, 
+			.m_graphicsQueue 	= state.vulkan.m_graphicsQueue, 
+			.m_commandPool 		= state.vulkan.m_commandPools[0], 
+	        .m_image 			= state.vulkan.m_swapChain.m_swapChainImages[state.vulkan.m_imageIndex], 
+			.m_format 			= state.vulkan.m_swapChain.m_swapChainImageFormat, 
 	        .m_oldLayout 		= VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, 
 			.m_newLayout 		= VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
 		});
 
 	    if (result == VK_ERROR_OUT_OF_DATE_KHR ) {
 	        vh::DevRecreateSwapChain( {
-				.m_window 			= window.m_window, 
-	            .m_surface 			= vulkan.m_surface, 
-				.m_physicalDevice 	= vulkan.m_physicalDevice, 
-				.m_device 			= vulkan.m_device, 
-				.m_vmaAllocator 	= vulkan.m_vmaAllocator, 
-	            .m_swapChain 		= vulkan.m_swapChain, 
-				.m_depthImage 		= vulkan.m_depthImage, 
-				.m_renderPass 		= vulkan.m_renderPass
+				.m_window 			= state.window.m_window, 
+	            .m_surface 			= state.vulkan.m_surface, 
+				.m_physicalDevice 	= state.vulkan.m_physicalDevice, 
+				.m_device 			= state.vulkan.m_device, 
+				.m_vmaAllocator 	= state.vulkan.m_vmaAllocator, 
+	            .m_swapChain 		= state.vulkan.m_swapChain, 
+				.m_depthImage 		= state.vulkan.m_depthImage, 
+				.m_renderPass 		= state.vulkan.m_renderPass
 			});
 
 	        //m_engine.SendMsg( MsgWindowSize{} );
@@ -201,69 +201,69 @@ namespace vhe {
 		return true;
 	}
 
-	bool RecordNextFrame(EngineState& engine, WindowState& window, VulkanState& vulkan, SceneState& scene ) {
-	    if(window.m_isMinimized) return false;
+	bool RecordNextFrame(State& state ) {
+	    if(state.window.m_isMinimized) return false;
 
-	    vkResetCommandBuffer(vulkan.m_commandBuffers[vulkan.m_currentFrame],  0);
+	    vkResetCommandBuffer(state.vulkan.m_commandBuffers[state.vulkan.m_currentFrame],  0);
 
-		vh::ComBeginCommandBuffer({vulkan.m_commandBuffers[vulkan.m_currentFrame]});
+		vh::ComBeginCommandBuffer({state.vulkan.m_commandBuffers[state.vulkan.m_currentFrame]});
 
 	    vh::ComBeginRenderPass({
-			.m_commandBuffer= vulkan.m_commandBuffers[vulkan.m_currentFrame], 
-			.m_imageIndex 	= vulkan.m_imageIndex, 
-	        .m_swapChain 	= vulkan.m_swapChain, 
-			.m_renderPass 	= vulkan.m_renderPass, 
+			.m_commandBuffer= state.vulkan.m_commandBuffers[state.vulkan.m_currentFrame], 
+			.m_imageIndex 	= state.vulkan.m_imageIndex, 
+	        .m_swapChain 	= state.vulkan.m_swapChain, 
+			.m_renderPass 	= state.vulkan.m_renderPass, 
 	        .m_clear 		= true, 
-	        .m_clearColor 	= window.m_clearColor, 
-	        .m_currentFrame = vulkan.m_currentFrame
+	        .m_clearColor 	= state.window.m_clearColor, 
+	        .m_currentFrame = state.vulkan.m_currentFrame
 		});
 
-	    vh::ComEndRenderPass({vulkan.m_commandBuffers[vulkan.m_currentFrame]});
-	    vh::ComEndCommandBuffer({vulkan.m_commandBuffers[vulkan.m_currentFrame]});
+	    vh::ComEndRenderPass({state.vulkan.m_commandBuffers[state.vulkan.m_currentFrame]});
+	    vh::ComEndCommandBuffer({state.vulkan.m_commandBuffers[state.vulkan.m_currentFrame]});
 
 	    return true;
 	}
 
-	bool RenderNextFrame(EngineState& engine, WindowState& window, VulkanState& vulkan, SceneState& scene ) {
-	    if(window.m_isMinimized) return false;
+	bool RenderNextFrame(State& state) {
+	    if(state.window.m_isMinimized) return false;
 	
-	    vh::ComSubmitCommandBuffers(vulkan);
+	    vh::ComSubmitCommandBuffers(state.vulkan);
 
 	    vh::ImgTransitionImageLayout2({
-			.m_device = vulkan.m_device, 
-			.m_graphicsQueue = vulkan.m_graphicsQueue, 
-			.m_commandPool = vulkan.m_commandPools[0], 
-	        .m_image = vulkan.m_swapChain.m_swapChainImages[vulkan.m_imageIndex], 
-			.m_format = vulkan.m_swapChain.m_swapChainImageFormat, 
+			.m_device = state.vulkan.m_device, 
+			.m_graphicsQueue = state.vulkan.m_graphicsQueue, 
+			.m_commandPool = state.vulkan.m_commandPools[0], 
+	        .m_image = state.vulkan.m_swapChain.m_swapChainImages[state.vulkan.m_imageIndex], 
+			.m_format = state.vulkan.m_swapChain.m_swapChainImageFormat, 
 	        .m_oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 
 			.m_newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
 		});
 
 	    VkResult result = vh::ComPresentImage( { 
-			.m_presentQueue = vulkan.m_presentQueue, 
-			.m_swapChain = vulkan.m_swapChain, 
-	        .m_imageIndex = vulkan.m_imageIndex, 
-			.m_signalSemaphore = vulkan.m_renderFinishedSemaphores[vulkan.m_currentFrame]
+			.m_presentQueue = state.vulkan.m_presentQueue, 
+			.m_swapChain = state.vulkan.m_swapChain, 
+	        .m_imageIndex = state.vulkan.m_imageIndex, 
+			.m_signalSemaphore = state.vulkan.m_renderFinishedSemaphores[state.vulkan.m_currentFrame]
 		});
 
-	    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || vulkan.m_framebufferResized) {
-	        vulkan.m_framebufferResized = false;
+	    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || state.vulkan.m_framebufferResized) {
+	        state.vulkan.m_framebufferResized = false;
 	        vh::DevRecreateSwapChain( {
-				.m_window = window.m_window, 
-	            .m_surface = vulkan.m_surface, 
-				.m_physicalDevice = vulkan.m_physicalDevice, 
-				.m_device = vulkan.m_device, 
-				.m_vmaAllocator = vulkan.m_vmaAllocator, 
-	            .m_swapChain = vulkan.m_swapChain, 
-				.m_depthImage = vulkan.m_depthImage, 
-				.m_renderPass = vulkan.m_renderPass
+				.m_window = state.window.m_window, 
+	            .m_surface = state.vulkan.m_surface, 
+				.m_physicalDevice = state.vulkan.m_physicalDevice, 
+				.m_device = state.vulkan.m_device, 
+				.m_vmaAllocator = state.vulkan.m_vmaAllocator, 
+	            .m_swapChain = state.vulkan.m_swapChain, 
+				.m_depthImage = state.vulkan.m_depthImage, 
+				.m_renderPass = state.vulkan.m_renderPass
 			});
 
 	    } else assert(result == VK_SUCCESS);
 	    return true;
 	}
 
-	void Step( EngineState& engine, WindowState& window, VulkanState& vulkan, SceneState& scene  ) {
+	void Step( State& state ) {
 	    SDL_Event event;
 	    SDL_PollEvent(&event);
 
@@ -272,76 +272,76 @@ namespace vhe {
 	        switch (event.type) {
 	            case SDL_EVENT_QUIT:
 	            case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-	                engine.m_running = false;
+	                state.engine.m_running = false;
 	                break;
 	            case SDL_EVENT_WINDOW_MINIMIZED:
-	                window.m_isMinimized = true;
+	                state.window.m_isMinimized = true;
 	                break;
 	            case SDL_EVENT_WINDOW_MAXIMIZED:
-	                window.m_isMinimized = false;
+	                state.window.m_isMinimized = false;
 	                break;
 	            case SDL_EVENT_WINDOW_RESTORED:
-	                window.m_isMinimized = false;
+	                state.window.m_isMinimized = false;
 	                break;
 				default: {
-						for( auto& system : engine.m_systems ) system->Event(engine, window, vulkan, scene, event);
+						for( auto& system : state.engine.m_systems ) system->Event(state);
 					}
 					break;
 	        }
 	    }
 
-		for( auto& system : engine.m_systems ) system->Update(engine, window, vulkan, scene);
+		for( auto& system : state.engine.m_systems ) system->Update(state);
 
-	    if(!window.m_isMinimized) {
+	    if(!state.window.m_isMinimized) {
 	        ImGui_ImplVulkan_NewFrame();
 	        ImGui_ImplSDL3_NewFrame();
 	        ImGui::NewFrame();
 
-			for( auto& system : engine.m_systems ) system->ImGUI(engine, window, vulkan, scene);
+			for( auto& system : state.engine.m_systems ) system->ImGUI(state);
 
 			ImGui::ShowDemoWindow(); // Show demo window! :)
 
-	        PrepareNextFrame(engine, window, vulkan, scene);
-	        RecordNextFrame(engine, window, vulkan, scene);
-	        RenderNextFrame(engine, window, vulkan, scene);
+	        PrepareNextFrame(state);
+	        RecordNextFrame(state);
+	        RenderNextFrame(state);
 	    }
 	}
 
 
-	void Quit(EngineState& engine, WindowState& window, VulkanState& vulkan, SceneState& scene ) {
-		vkDeviceWaitIdle(vulkan.m_device);
+	void Quit(vhe::State& state ) {
+		vkDeviceWaitIdle(state.vulkan.m_device);
 
-		scene.m_root = nullptr; //clear all objects
+		state.scene.m_root = nullptr; //clear all objects
 
-		vh::DevCleanupSwapChain(vulkan);
+		vh::DevCleanupSwapChain(state.vulkan);
 	
-		for( auto& pipe : vulkan.m_pipelines) {
-			vkDestroyPipeline(vulkan.m_device, pipe.m_pipeline, nullptr);
-			vkDestroyPipelineLayout(vulkan.m_device, pipe.m_pipelineLayout, nullptr);
+		for( auto& pipe : state.vulkan.m_pipelines) {
+			vkDestroyPipeline(state.vulkan.m_device, pipe.m_pipeline, nullptr);
+			vkDestroyPipelineLayout(state.vulkan.m_device, pipe.m_pipelineLayout, nullptr);
 		}
 	
-		vkDestroyDescriptorPool(vulkan.m_device, vulkan.m_descriptorPool, nullptr);
+		vkDestroyDescriptorPool(state.vulkan.m_device, state.vulkan.m_descriptorPool, nullptr);
 	
-		vkDestroyDescriptorSetLayout(vulkan.m_device, vulkan.m_descriptorSetLayoutPerFrame, nullptr);
+		vkDestroyDescriptorSetLayout(state.vulkan.m_device, state.vulkan.m_descriptorSetLayoutPerFrame, nullptr);
 	
-		for( auto& pool : vulkan.m_commandPools) {
-			vkDestroyCommandPool(vulkan.m_device, pool, nullptr);
+		for( auto& pool : state.vulkan.m_commandPools) {
+			vkDestroyCommandPool(state.vulkan.m_device, pool, nullptr);
 		}
 	
-		vkDestroyRenderPass(vulkan.m_device, vulkan.m_renderPass, nullptr);
-		vh::SynDestroyFences(vulkan);
-		vh::SynDestroySemaphores(vulkan);
-		vmaDestroyAllocator(vulkan.m_vmaAllocator);
-		vkDestroyDevice(vulkan.m_device, nullptr);
-		vkDestroySurfaceKHR(vulkan.m_instance, vulkan.m_surface, nullptr);
+		vkDestroyRenderPass(state.vulkan.m_device, state.vulkan.m_renderPass, nullptr);
+		vh::SynDestroyFences(state.vulkan);
+		vh::SynDestroySemaphores(state.vulkan);
+		vmaDestroyAllocator(state.vulkan.m_vmaAllocator);
+		vkDestroyDevice(state.vulkan.m_device, nullptr);
+		vkDestroySurfaceKHR(state.vulkan.m_instance, state.vulkan.m_surface, nullptr);
 	
-		if (engine.m_debug) {
-			vh::DevDestroyDebugUtilsMessengerEXT(vulkan);
+		if (state.engine.m_debug) {
+			vh::DevDestroyDebugUtilsMessengerEXT(state.vulkan);
 		}
 	
-		vkDestroyInstance(vulkan.m_instance, nullptr);
+		vkDestroyInstance(state.vulkan.m_instance, nullptr);
 	
-		SDL_DestroyWindow(window.m_window);
+		SDL_DestroyWindow(state.window.m_window);
 		SDL_Quit();
 	}
 
@@ -354,60 +354,64 @@ class MyGame : public vhe::System {
 	MyGame() : System() {};
 	~MyGame() {};
 	
-	virtual void Init(vhe::EngineState& engine, vhe::WindowState& window, vhe::VulkanState& vulkan, vhe::SceneState& scene) {
+	virtual void Init(vhe::State& state) {
 		//do something
 	}
 
-	virtual void Event(vhe::EngineState& engine, vhe::WindowState& window, vhe::VulkanState& vulkan, vhe::SceneState& scene, SDL_Event event ) {
+	virtual void FrameStart(vhe::State& state) {
+		//do something
+	}
+
+	virtual void Event(vhe::State& state) {
 		//do something
 	};
 
-	virtual void Update(vhe::EngineState& engine, vhe::WindowState& window, vhe::VulkanState& vulkan, vhe::SceneState& scene ) {
+	virtual void Update(vhe::State& state) {
 		//do something
 	};
 
-	virtual void ImGUI(vhe::EngineState& engine, vhe::WindowState& window, vhe::VulkanState& vulkan, vhe::SceneState& scene ) {
+	virtual void ImGUI(vhe::State& state ) {
 		//do something
 	};
 
+	virtual void FrameEnd(vhe::State& state) {
+		//do something
+	}
 };
 
 
 int main() {
 	using namespace vhe; 
 
-    EngineState engine;
-    WindowState window;
-    VulkanState vulkan;
-    SceneState scene;
+    vhe::State state;
 
     #ifdef NDEBUG
-        engine.m_debug = false;
+        state.engine.m_debug = false;
     #else
-        engine.m_debug = true;
-        vulkan.m_validationLayers.push_back("VK_LAYER_KHRONOS_validation");
+        state.engine.m_debug = true;
+        state.vulkan.m_validationLayers.push_back("VK_LAYER_KHRONOS_validation");
     #endif
 
     #ifdef __APPLE__
-        vulkan.m_deviceExtensions.push_back("VK_KHR_portability_subset");
+        state.vulkan.m_deviceExtensions.push_back("VK_KHR_portability_subset");
     #endif
 
 	std::vector<std::unique_ptr<System>> systems;
-	engine.m_systems.emplace_back(std::move(std::make_unique<MyGame>()));
+	state.engine.m_systems.emplace_back(std::move(std::make_unique<MyGame>()));
 
-    Init(engine, window, vulkan, scene);
+    Init(state);
 
-	for( auto& system : engine.m_systems ) system->Init(engine, window, vulkan, scene);
+	for( auto& system : state.engine.m_systems ) system->Init(state);
 
     auto prev = std::chrono::high_resolution_clock::now();
-    while (engine.m_running) {
+    while (state.engine.m_running) {
         auto now = std::chrono::high_resolution_clock::now();
-		engine.m_dt = std::chrono::duration<double, std::micro>(now - prev).count() / 1'000'000.0;
+		state.engine.m_dt = std::chrono::duration<double, std::micro>(now - prev).count() / 1'000'000.0;
         prev = now;
-        Step(engine, window, vulkan, scene);
+        Step(state);
     };
 
-	Quit(engine, window, vulkan, scene);
+	Quit(state);
 
     return 0;
 }
