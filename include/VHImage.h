@@ -1,7 +1,7 @@
 #pragma once
 
 
-namespace vh {
+namespace vvh {
     
 	//---------------------------------------------------------------------------------------------
 	struct ImgCreateTextureImageInfo {
@@ -497,7 +497,7 @@ namespace vh {
 		memcpy(info.m_bufferData, data, (size_t)info.m_imageSize);
 		vmaUnmapMemory( info.m_vmaAllocator, stagingBufferAllocation);
 
-		vh::ImgSwapChannels(info);
+		vvh::ImgSwapChannels(info);
 
 		vmaDestroyBuffer( info.m_vmaAllocator, stagingBuffer, stagingBufferAllocation);
 		return VK_SUCCESS;

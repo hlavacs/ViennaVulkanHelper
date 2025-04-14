@@ -1,6 +1,6 @@
 #pragma once
 
-namespace vh {
+namespace vvh {
 
 	//---------------------------------------------------------------------------------------------
 
@@ -257,7 +257,7 @@ namespace vh {
 
 		size_t size = info.m_commandBuffers.size();
 		if( size > info.m_intermediateSemaphores.size() ) {
-			vh::SynCreateSemaphores({
+			vvh::SynCreateSemaphores({
 				.m_device = info.m_device, 
 				.m_imageAvailableSemaphores = info.m_imageAvailableSemaphores, 
 				.m_renderFinishedSemaphores = info.m_renderFinishedSemaphores, 

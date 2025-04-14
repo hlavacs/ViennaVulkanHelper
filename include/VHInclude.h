@@ -33,7 +33,7 @@
 
 #include "VHVulkan.h"
 
-namespace vh {
+namespace vvh {
 	void SetupImgui(SDL_Window* sdlWindow, VkInstance instance, VkPhysicalDevice physicalDevice, QueueFamilyIndices queueFamilies
 		, VkDevice device, VkQueue graphicsQueue, VkCommandPool commandPool, VkDescriptorPool descriptorPool
 		, VkRenderPass renderPass);

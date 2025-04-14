@@ -130,11 +130,11 @@ namespace vhe {
 	    VkPhysicalDeviceProperties 	m_physicalDeviceProperties;
 
 	    VkDevice 		m_device{VK_NULL_HANDLE};
-	    vh::QueueFamilyIndices m_queueFamilies;
+	    vvh::QueueFamilyIndices m_queueFamilies;
 	    VkQueue 		m_graphicsQueue{VK_NULL_HANDLE};
 	    VkQueue 		m_presentQueue{VK_NULL_HANDLE};
-	    vh::SwapChain 	m_swapChain;
-	    vh::DepthImage 	m_depthImage;
+	    vvh::SwapChain 	m_swapChain;
+	    vvh::DepthImage 	m_depthImage;
 	    VkFormat		m_depthFormat{VK_FORMAT_UNDEFINED};
 
 	    std::vector<VkCommandPool> m_commandPools; //per frame in flight
@@ -142,17 +142,17 @@ namespace vhe {
 
 	    std::vector<VkSemaphore> m_imageAvailableSemaphores;
 	    std::vector<VkSemaphore> m_renderFinishedSemaphores;
-	    std::vector<vh::Semaphores> m_intermediateSemaphores;
+	    std::vector<vvh::Semaphores> m_intermediateSemaphores;
 	    std::vector<VkFence>     m_fences;
 
-	    vh::Buffer          m_uniformBuffersPerFrame;
-	    vh::Buffer          m_uniformBuffersLights;
+	    vvh::Buffer          m_uniformBuffersPerFrame;
+	    vvh::Buffer          m_uniformBuffersLights;
 	    VkDescriptorSetLayout m_descriptorSetLayoutPerFrame;
-	    vh::DescriptorSet   m_descriptorSetPerFrame{0};
+	    vvh::DescriptorSet   m_descriptorSetPerFrame{0};
 	    VkRenderPass        m_renderPass;
 	    VkDescriptorPool    m_descriptorPool;
 
-	    std::vector<vh::Pipeline> m_pipelines;
+	    std::vector<vvh::Pipeline> m_pipelines;
 
 	    uint32_t    m_currentFrame = MAXINFLIGHT - 1;
 	    uint32_t    m_imageIndex;
@@ -162,10 +162,10 @@ namespace vhe {
 	struct Object {
 	    const VulkanState&  m_vulkan;
 	    std::string         m_name;
-	    vh::BufferPerObjectTexture m_ubo; 
-	    vh::Buffer          m_uniformBuffers;
-	    vh::Map             m_texture;
-	    vh::Mesh            m_mesh;
+	    vvh::BufferPerObjectTexture m_ubo; 
+	    vvh::Buffer          m_uniformBuffers;
+	    vvh::Map             m_texture;
+	    vvh::Mesh            m_mesh;
 	    std::vector<VkDescriptorSet> m_descriptorSets;
 
 	    glm::mat4 m_localToParent{1.0f}; //contains position, orientation and scale

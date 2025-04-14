@@ -39,7 +39,9 @@ namespace std {
     }
 
 
-namespace vh {
+namespace vvh {
+
+
 
 	inline auto ToCharPtr(const std::vector<std::string>& vec) -> std::vector<const char*> { 
 	    std::vector<const char*> res;
@@ -86,7 +88,7 @@ namespace vh {
 	struct BufferPerObjectColor {
 	    glm::mat4 model;
 	    glm::mat4 modelInverseTranspose;
-		vh::Color color{}; 		
+		vvh::Color color{}; 		
 	};
 
 	struct BufferPerObjectTexture {

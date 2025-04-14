@@ -1,7 +1,7 @@
 #pragma once
 
 
-namespace vh {
+namespace vvh {
 
 	//---------------------------------------------------------------------------------------------
 
@@ -296,7 +296,7 @@ namespace vh {
 		std::vector<VkPipelineShaderStageCreateInfo> shaderStages;
 
         VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
-        auto vertShaderCode = vh::ReadFile(info.m_vertShaderPath);
+        auto vertShaderCode = vvh::ReadFile(info.m_vertShaderPath);
         VkShaderModule vertShaderModule = RenCreateShaderModule({info.m_device, vertShaderCode });
         vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
@@ -308,7 +308,7 @@ namespace vh {
 		VkShaderModule fragShaderModule{};
 		if( !info.m_fragShaderPath.empty() ) {
 	        VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
-	        auto fragShaderCode = vh::ReadFile(info.m_fragShaderPath);
+	        auto fragShaderCode = vvh::ReadFile(info.m_fragShaderPath);
 	        fragShaderModule = RenCreateShaderModule({info.m_device, fragShaderCode });
 	        fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 	        fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;

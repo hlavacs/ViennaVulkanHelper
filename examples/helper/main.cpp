@@ -7,12 +7,12 @@
 namespace vhe {
 
 	void Init( State& state ) {
-	    vh::SDL3Init( std::string("Vienna Vulkan Helper"), 800, 600, state.vulkan.m_instanceExtensions);
+	    vvh::SDL3Init( std::string("Vienna Vulkan Helper"), 800, 600, state.vulkan.m_instanceExtensions);
 	    if (state.engine.m_debug) { state.vulkan.m_instanceExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); }
 
 	    volkInitialize();
 	    state.vulkan.m_apiVersionInstance = state.engine.m_apiVersion;
-	    vh::DevCreateInstance( {
+	    vvh::DevCreateInstance( {
 	            .m_validationLayers 	= state.vulkan.m_validationLayers, 
 	            .m_instanceExtensions 	= state.vulkan.m_instanceExtensions, 
 	            .m_name 				= state.engine.m_name, 
@@ -25,7 +25,7 @@ namespace vhe {
 	    volkLoadInstance(state.vulkan.m_instance);
 
 	    if (state.engine.m_debug) {
-	        vh::DevSetupDebugMessenger(state.vulkan.m_instance, state.vulkan.m_debugMessenger);
+	        vvh::DevSetupDebugMessenger(state.vulkan.m_instance, state.vulkan.m_debugMessenger);
 	    }
 
 	    if (SDL_Vulkan_CreateSurface(state.window.m_window, state.vulkan.m_instance, nullptr, &state.vulkan.m_surface) == 0) {
@@ -34,7 +34,7 @@ namespace vhe {
 
 	    state.vulkan.m_apiVersionDevice = state.engine.m_minimumVersion;
 	    
-		vh::DevPickPhysicalDevice(state.vulkan);
+		vvh::DevPickPhysicalDevice(state.vulkan);
 		
 		uint32_t minor = std::min( VK_VERSION_MINOR(state.vulkan.m_apiVersionDevice), VK_VERSION_MINOR(state.engine.m_apiVersion) );
 	    if( minor < VK_VERSION_MINOR(state.engine.m_minimumVersion) ) {
@@ -46,12 +46,12 @@ namespace vhe {
 	    vkGetPhysicalDeviceProperties(state.vulkan.m_physicalDevice, &state.vulkan.m_physicalDeviceProperties);
 	    vkGetPhysicalDeviceFeatures(state.vulkan.m_physicalDevice, &state.vulkan.m_physicalDeviceFeatures);
 
-	    state.vulkan.m_depthFormat = vh::ImgPickDepthMapFormat( {
+	    state.vulkan.m_depthFormat = vvh::ImgPickDepthMapFormat( {
 				.m_physicalDevice = state.vulkan.m_physicalDevice, 
 				.m_depthFormats = {VK_FORMAT_R32_UINT}
 			});
 
-	    vh::DevCreateLogicalDevice( {
+	    vvh::DevCreateLogicalDevice( {
 			.m_surface 			= state.vulkan.m_surface, 
 			.m_physicalDevice 	= state.vulkan.m_physicalDevice, 
 			.m_validationLayers = state.vulkan.m_validationLayers, 
@@ -65,9 +65,9 @@ namespace vhe {
 	
 	    volkLoadDevice(state.vulkan.m_device);
 	
-	    vh::DevInitVMA(state.vulkan);  
+	    vvh::DevInitVMA(state.vulkan);  
 
-	    vh::DevCreateSwapChain({
+	    vvh::DevCreateSwapChain({
 			.m_window 			= state.window.m_window, 
 			.m_surface 			= state.vulkan.m_surface, 
 			.m_physicalDevice 	= state.vulkan.m_physicalDevice, 
@@ -75,9 +75,9 @@ namespace vhe {
 			.m_swapChain 		= state.vulkan.m_swapChain
 		});
 		
-	    vh::DevCreateImageViews(state.vulkan);
+	    vvh::DevCreateImageViews(state.vulkan);
 
-	    vh::RenCreateRenderPass({
+	    vvh::RenCreateRenderPass({
 			.m_depthFormat 	= state.vulkan.m_depthFormat, 
 			.m_device 		= state.vulkan.m_device, 
 			.m_swapChain 	= state.vulkan.m_swapChain, 
@@ -85,14 +85,14 @@ namespace vhe {
 			.m_renderPass 	= state.vulkan.m_renderPass
 		});
 
-	    vh::RenCreateDescriptorSetLayout( {
+	    vvh::RenCreateDescriptorSetLayout( {
 			.m_device = state.vulkan.m_device, 
 			.m_bindings = {}, 
 			.m_descriptorSetLayout = state.vulkan.m_descriptorSetLayoutPerFrame 
 		});
 		
 	    state.vulkan.m_pipelines.resize(1);
-	    vh::RenCreateGraphicsPipeline({
+	    vvh::RenCreateGraphicsPipeline({
 			.m_device = state.vulkan.m_device, 
 			.m_renderPass = state.vulkan.m_renderPass, 
 			.m_vertShaderPath = "shaders/shader.spv", 
@@ -108,7 +108,7 @@ namespace vhe {
 
 	    state.vulkan.m_commandPools.resize(MAX_FRAMES_IN_FLIGHT);
 	    for( int i=0; i<MAX_FRAMES_IN_FLIGHT; ++i) {
-	        vh::ComCreateCommandPool( {
+	        vvh::ComCreateCommandPool( {
 				.m_surface = state.vulkan.m_surface, 
 				.m_physicalDevice = state.vulkan.m_physicalDevice, 
 				.m_device = state.vulkan.m_device, 
@@ -116,9 +116,9 @@ namespace vhe {
 			});
 	    }
 	
-	    vh::RenCreateDepthResources(state.vulkan);
+	    vvh::RenCreateDepthResources(state.vulkan);
 
-	    vh::ImgTransitionImageLayout({
+	    vvh::ImgTransitionImageLayout({
 			.m_device = state.vulkan.m_device, 
 			.m_graphicsQueue = state.vulkan.m_graphicsQueue, 
 			.m_commandPool = state.vulkan.m_commandPools[0],
@@ -132,7 +132,7 @@ namespace vhe {
 		});
 		
 	    for( auto image : state.vulkan.m_swapChain.m_swapChainImages ) {
-	        vh::ImgTransitionImageLayout2({
+	        vvh::ImgTransitionImageLayout2({
 				.m_device = state.vulkan.m_device, 
 				.m_graphicsQueue = state.vulkan.m_graphicsQueue, 
 				.m_commandPool = state.vulkan.m_commandPools[0],
@@ -143,14 +143,14 @@ namespace vhe {
 			});
 	    }
 
-	    vh::RenCreateFramebuffers(state.vulkan);
-	    vh::RenCreateDescriptorPool( { 
+	    vvh::RenCreateFramebuffers(state.vulkan);
+	    vvh::RenCreateDescriptorPool( { 
 			.m_device = state.vulkan.m_device, 
 			.m_sizes = 1000, 
 			.m_descriptorPool = state.vulkan.m_descriptorPool 
 		});
 	
-	    vh::SynCreateSemaphores({
+	    vvh::SynCreateSemaphores({
 			.m_device 					= state.vulkan.m_device, 
 			.m_imageAvailableSemaphores = state.vulkan.m_imageAvailableSemaphores, 
 			.m_renderFinishedSemaphores = state.vulkan.m_renderFinishedSemaphores, 
@@ -158,7 +158,7 @@ namespace vhe {
 			.m_intermediateSemaphores = state.vulkan.m_intermediateSemaphores
 		});
 
-	    vh::SynCreateFences( { state.vulkan.m_device, MAX_FRAMES_IN_FLIGHT, state.vulkan.m_fences });
+	    vvh::SynCreateFences( { state.vulkan.m_device, MAX_FRAMES_IN_FLIGHT, state.vulkan.m_fences });
 	}
 
 
@@ -167,14 +167,14 @@ namespace vhe {
 
 	    state.vulkan.m_currentFrame = (state.vulkan.m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 	    state.vulkan.m_commandBuffers.resize(1);
-	    vh::ComCreateCommandBuffers({state.vulkan.m_device, state.vulkan.m_commandPools[state.vulkan.m_currentFrame], state.vulkan.m_commandBuffers});
+	    vvh::ComCreateCommandBuffers({state.vulkan.m_device, state.vulkan.m_commandPools[state.vulkan.m_currentFrame], state.vulkan.m_commandBuffers});
 
 	    vkWaitForFences(state.vulkan.m_device, 1, &state.vulkan.m_fences[state.vulkan.m_currentFrame], VK_TRUE, UINT64_MAX);
 
 	    VkResult result = vkAcquireNextImageKHR(state.vulkan.m_device, state.vulkan.m_swapChain.m_swapChain, UINT64_MAX,
 	                        state.vulkan.m_imageAvailableSemaphores[state.vulkan.m_currentFrame], VK_NULL_HANDLE, &state.vulkan.m_imageIndex);
 
-	    vh::ImgTransitionImageLayout2({
+	    vvh::ImgTransitionImageLayout2({
 			.m_device 			= state.vulkan.m_device, 
 			.m_graphicsQueue 	= state.vulkan.m_graphicsQueue, 
 			.m_commandPool 		= state.vulkan.m_commandPools[0], 
@@ -185,7 +185,7 @@ namespace vhe {
 		});
 
 	    if (result == VK_ERROR_OUT_OF_DATE_KHR ) {
-	        vh::DevRecreateSwapChain( {
+	        vvh::DevRecreateSwapChain( {
 				.m_window 			= state.window.m_window, 
 	            .m_surface 			= state.vulkan.m_surface, 
 				.m_physicalDevice 	= state.vulkan.m_physicalDevice, 
@@ -206,9 +206,9 @@ namespace vhe {
 
 	    vkResetCommandBuffer(state.vulkan.m_commandBuffers[state.vulkan.m_currentFrame],  0);
 
-		vh::ComBeginCommandBuffer({state.vulkan.m_commandBuffers[state.vulkan.m_currentFrame]});
+		vvh::ComBeginCommandBuffer({state.vulkan.m_commandBuffers[state.vulkan.m_currentFrame]});
 
-	    vh::ComBeginRenderPass({
+	    vvh::ComBeginRenderPass({
 			.m_commandBuffer= state.vulkan.m_commandBuffers[state.vulkan.m_currentFrame], 
 			.m_imageIndex 	= state.vulkan.m_imageIndex, 
 	        .m_swapChain 	= state.vulkan.m_swapChain, 
@@ -218,8 +218,8 @@ namespace vhe {
 	        .m_currentFrame = state.vulkan.m_currentFrame
 		});
 
-	    vh::ComEndRenderPass({state.vulkan.m_commandBuffers[state.vulkan.m_currentFrame]});
-	    vh::ComEndCommandBuffer({state.vulkan.m_commandBuffers[state.vulkan.m_currentFrame]});
+	    vvh::ComEndRenderPass({state.vulkan.m_commandBuffers[state.vulkan.m_currentFrame]});
+	    vvh::ComEndCommandBuffer({state.vulkan.m_commandBuffers[state.vulkan.m_currentFrame]});
 
 	    return true;
 	}
@@ -227,9 +227,9 @@ namespace vhe {
 	bool RenderNextFrame(State& state) {
 	    if(state.window.m_isMinimized) return false;
 	
-	    vh::ComSubmitCommandBuffers(state.vulkan);
+	    vvh::ComSubmitCommandBuffers(state.vulkan);
 
-	    vh::ImgTransitionImageLayout2({
+	    vvh::ImgTransitionImageLayout2({
 			.m_device = state.vulkan.m_device, 
 			.m_graphicsQueue = state.vulkan.m_graphicsQueue, 
 			.m_commandPool = state.vulkan.m_commandPools[0], 
@@ -239,7 +239,7 @@ namespace vhe {
 			.m_newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
 		});
 
-	    VkResult result = vh::ComPresentImage( { 
+	    VkResult result = vvh::ComPresentImage( { 
 			.m_presentQueue = state.vulkan.m_presentQueue, 
 			.m_swapChain = state.vulkan.m_swapChain, 
 	        .m_imageIndex = state.vulkan.m_imageIndex, 
@@ -248,7 +248,7 @@ namespace vhe {
 
 	    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || state.vulkan.m_framebufferResized) {
 	        state.vulkan.m_framebufferResized = false;
-	        vh::DevRecreateSwapChain( {
+	        vvh::DevRecreateSwapChain( {
 				.m_window = state.window.m_window, 
 	            .m_surface = state.vulkan.m_surface, 
 				.m_physicalDevice = state.vulkan.m_physicalDevice, 
@@ -313,7 +313,7 @@ namespace vhe {
 
 		state.scene.m_root = nullptr; //clear all objects
 
-		vh::DevCleanupSwapChain(state.vulkan);
+		vvh::DevCleanupSwapChain(state.vulkan);
 	
 		for( auto& pipe : state.vulkan.m_pipelines) {
 			vkDestroyPipeline(state.vulkan.m_device, pipe.m_pipeline, nullptr);
@@ -329,14 +329,14 @@ namespace vhe {
 		}
 	
 		vkDestroyRenderPass(state.vulkan.m_device, state.vulkan.m_renderPass, nullptr);
-		vh::SynDestroyFences(state.vulkan);
-		vh::SynDestroySemaphores(state.vulkan);
+		vvh::SynDestroyFences(state.vulkan);
+		vvh::SynDestroySemaphores(state.vulkan);
 		vmaDestroyAllocator(state.vulkan.m_vmaAllocator);
 		vkDestroyDevice(state.vulkan.m_device, nullptr);
 		vkDestroySurfaceKHR(state.vulkan.m_instance, state.vulkan.m_surface, nullptr);
 	
 		if (state.engine.m_debug) {
-			vh::DevDestroyDebugUtilsMessengerEXT(state.vulkan);
+			vvh::DevDestroyDebugUtilsMessengerEXT(state.vulkan);
 		}
 	
 		vkDestroyInstance(state.vulkan.m_instance, nullptr);

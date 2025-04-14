@@ -23,7 +23,7 @@
 #include "VHInclude.h"
 
 
-namespace vh
+namespace vvh
 {
 
 	extern VkInstance volkInstance;
