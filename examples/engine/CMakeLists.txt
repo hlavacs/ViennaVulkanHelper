@@ -1,4 +1,4 @@
-set(TARGET helper)
+set(TARGET engine)
 
 set(SOURCE 
 	main.cpp
