@@ -3,7 +3,6 @@ set(TARGET engine)
 set(SOURCE 
 	main.cpp
 	helper.cpp
-	${PROJECT_SOURCE_DIR}/src/VHInclude.cpp
 )
 
 set(HEADERS 
