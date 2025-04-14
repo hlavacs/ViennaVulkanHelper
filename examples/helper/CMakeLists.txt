@@ -8,13 +8,13 @@ set(SOURCE
 
 set(HEADERS 
 	helper.h
-	${INCLUDE}/VHBuffer.h
-	${INCLUDE}/VHCommand.h
-	${INCLUDE}/VHDevice.h
-	${INCLUDE}/VHImage.h
-	${INCLUDE}/VHRender.h
-	${INCLUDE}/VHSync.h
-	${INCLUDE}/VHVulkan.h
+	${INCLUDE}/VHBuffer2.h
+	${INCLUDE}/VHCommand2.h
+	${INCLUDE}/VHDevice2.h
+	${INCLUDE}/VHImage2.h
+	${INCLUDE}/VHRender2.h
+	${INCLUDE}/VHSync2.h
+	${INCLUDE}/VHVulkan2.h
 )
 
 add_executable(${TARGET} ${SOURCE} ${HEADERS})

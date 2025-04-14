@@ -31,7 +31,7 @@
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_vulkan.h"
 
-#include "VHVulkan.h"
+#include "VHVulkan2.h"
 
 namespace vvh {
 	void SetupImgui(SDL_Window* sdlWindow, VkInstance instance, VkPhysicalDevice physicalDevice, QueueFamilyIndices queueFamilies
