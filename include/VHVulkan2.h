@@ -20,28 +20,8 @@
 #define MAXINFLIGHT 2
 
 
-namespace std {
-	template <typename T, typename... Rest>
-	inline void hash_combine(std::size_t& seed, const T& v, const Rest&... rest) {
-	    seed ^= std::hash<T>{}(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-	    (hash_combine(seed, rest), ...);
-	}
-}
-
-#define VHCHECKRESULT(x)          \
-    {                             \
-        VkResult retval = (x);    \
-        if (retval != VK_SUCCESS) \
-        {                         \
-			std::out << "ERROR: " << std::endl; \\
-            exit(retval);		        \
-        }                        \
-    }
-
 
 namespace vvh {
-
-
 
 	inline auto ToCharPtr(const std::vector<std::string>& vec) -> std::vector<const char*> { 
 	    std::vector<const char*> res;
