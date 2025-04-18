@@ -162,6 +162,7 @@ namespace vvh {
 	template<typename T = ComBindPipelineInfo>
 	inline void ComBindPipeline(T&& info) {
 
+		std::vector<VkViewport> viewPorts = info.m_viewPorts;
 		VkViewport viewport{};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
@@ -169,14 +170,16 @@ namespace vvh {
 		viewport.height = (float) info.m_swapChain.m_swapChainExtent.height;
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
-		if(info.m_viewPorts.size() == 0) info.m_viewPorts.push_back(viewport);
-		vkCmdSetViewport(info.m_commandBuffer, 0, info.m_viewPorts.size(), info.m_viewPorts.data());
+		if(viewPorts.size() == 0) viewPorts.push_back(viewport);
+		vkCmdSetViewport(info.m_commandBuffer, 0, viewPorts.size(), viewPorts.data());
   
+
+		std::vector<VkRect2D> scissors = info.m_scissors;
 		VkRect2D scissor{};
 		scissor.offset = {0, 0};
 		scissor.extent = info.m_swapChain.m_swapChainExtent;
-		if(info.m_scissors.size() == 0) info.m_scissors.push_back(scissor);
-		vkCmdSetScissor(info.m_commandBuffer, 0, info.m_scissors.size(), info.m_scissors.data());
+		if(scissors.size() == 0) scissors.push_back(scissor);
+		vkCmdSetScissor(info.m_commandBuffer, 0, scissors.size(), scissors.data());
 
 		vkCmdSetBlendConstants(info.m_commandBuffer, &info.m_blendConstants[0]);
 
