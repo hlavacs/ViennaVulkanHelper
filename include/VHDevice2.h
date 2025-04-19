@@ -616,8 +616,8 @@ namespace vvh {
 
 	//---------------------------------------------------------------------------------------------
     struct DevCreateImageViewsInfo{
-		const VkDevice& 	m_device;
-		const SwapChain& 	m_swapChain;
+		const VkDevice& m_device;
+		SwapChain& 		m_swapChain;
 	};
 
 	template<typename T = DevCreateImageViewsInfo>
