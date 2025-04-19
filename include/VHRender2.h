@@ -373,8 +373,8 @@ namespace vvh {
         colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
         colorBlending.logicOpEnable = VK_FALSE;
         colorBlending.logicOp = VK_LOGIC_OP_COPY;
-        colorBlending.attachmentCount = info.m_blendAttachments.size();
-        colorBlending.pAttachments = info.m_blendAttachments.data();
+        colorBlending.attachmentCount = blendAttachments.size();
+        colorBlending.pAttachments = blendAttachments.data();
         colorBlending.blendConstants[0] = 0.0f;
         colorBlending.blendConstants[1] = 0.0f;
         colorBlending.blendConstants[2] = 0.0f;
