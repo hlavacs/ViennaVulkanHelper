@@ -504,24 +504,5 @@ namespace vvh {
 	}
 
 
-	//---------------------------------------------------------------------------------------------
-
-    struct ImgPickDepthMapFormatinfo {
-		const VkPhysicalDevice& 		m_physicalDevice;
-		const std::vector<VkFormat>& 	m_depthFormats;
-	};
-
-	template<typename T = ImgPickDepthMapFormatinfo>
-    inline auto ImgPickDepthMapFormat(T&& info) -> VkFormat {
-        for( auto format : info.m_depthFormats ) {
-            VkFormatProperties properties;
-            vkGetPhysicalDeviceFormatProperties(info.m_physicalDevice, format, &properties);
-            if( properties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT &&
-                properties.linearTilingFeatures & VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT ) {
-				return format;
-            }
-        }
-		throw std::runtime_error("failed to find supported depth format!");
-    }
 }
 

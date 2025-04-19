@@ -46,10 +46,7 @@ namespace vhe {
 	    vkGetPhysicalDeviceProperties(state.vulkan.m_physicalDevice, &state.vulkan.m_physicalDeviceProperties);
 	    vkGetPhysicalDeviceFeatures(state.vulkan.m_physicalDevice, &state.vulkan.m_physicalDeviceFeatures);
 
-	    state.vulkan.m_depthFormat = vvh::ImgPickDepthMapFormat( {
-				.m_physicalDevice = state.vulkan.m_physicalDevice, 
-				.m_depthFormats = {VK_FORMAT_R32_UINT}
-			});
+	    state.vulkan.m_depthFormat = vvh::RenFindDepthFormat(state.vulkan.m_physicalDevice);    
 
 	    vvh::DevCreateLogicalDevice( {
 			.m_surface 			= state.vulkan.m_surface, 
