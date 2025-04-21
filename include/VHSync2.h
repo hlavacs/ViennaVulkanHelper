@@ -89,9 +89,9 @@ namespace vvh {
 
 	struct SynDestroySemaphoresInfo {
 		const VkDevice m_device;
-		std::vector<VkSemaphore>& imageAvailableSemaphores;
-		std::vector<VkSemaphore>& renderFinishedSemaphores; 
-		std::vector<Semaphores>& intermediateSemaphores;
+		std::vector<VkSemaphore>& m_imageAvailableSemaphores;
+		std::vector<VkSemaphore>& m_renderFinishedSemaphores; 
+		std::vector<Semaphores>& m_intermediateSemaphores;
 	};
 
 	template<typename T = SynDestroySemaphoresInfo>
