@@ -271,7 +271,7 @@ namespace vvh {
 
 		vkResetFences(info.m_device, 1, &info.m_fences[info.m_currentFrame]);
 
-		VkSemaphore* waitSemaphore = &info.m_imageAvailableSemaphores[info.m_currentFrame];
+		const VkSemaphore* waitSemaphore = &info.m_imageAvailableSemaphores[info.m_currentFrame];
 		std::vector<VkSubmitInfo> submitInfos(info.m_commandBuffers.size());
 		VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
 		VkFence fence = VK_NULL_HANDLE;
