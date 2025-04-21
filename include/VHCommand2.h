@@ -248,9 +248,9 @@ namespace vvh {
 		const VkDevice& 					m_device;
 		const VkQueue& 						m_graphicsQueue;
 		const std::vector<VkCommandBuffer>& m_commandBuffers;
-		const std::vector<VkSemaphore>& 	m_imageAvailableSemaphores;
-		const std::vector<VkSemaphore>& 	m_renderFinishedSemaphores; 
-        const std::vector<Semaphores>& 		m_intermediateSemaphores; 
+		std::vector<VkSemaphore>& 			m_imageAvailableSemaphores;
+		std::vector<VkSemaphore>& 			m_renderFinishedSemaphores; 
+        std::vector<Semaphores>& 			m_intermediateSemaphores; 
 		const std::vector<VkFence>& 		m_fences; 
 		const uint32_t& 					m_currentFrame;
 	};
