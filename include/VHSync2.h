@@ -30,7 +30,7 @@ namespace vvh {
 
 	struct SynDestroyFencesInfo {
 		const VkDevice& m_device;
-		std::vector<VkFence>& fences;
+		std::vector<VkFence>& m_fences;
 	};
 
 	template<typename T = SynDestroyFencesInfo>

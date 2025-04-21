@@ -14,7 +14,7 @@ namespace vvh {
 		const int& 				m_width;
 		const int& 				m_height;
 		const size_t& 			m_size;
-		const Map& 				m_texture;
+		const VkImage& 			m_texture;
 	};
 
 	template<typename T = ImgCreateTextureImageInfo>
@@ -88,7 +88,7 @@ namespace vvh {
 
     struct ImgCreateTextureImageViewinfo {
 		const VkDevice& m_device;
-		const Map& m_texture;
+		const Image& m_texture;
 	};
 
 	template<typename T = ImgCreateTextureImageViewinfo>
@@ -106,7 +106,7 @@ namespace vvh {
 	struct ImgCreateTextureSamplerInfo {
 		const VkPhysicalDevice& m_physicalDevice;
 		const VkDevice& 		m_device;
-		const Map& 				m_texture;
+		const Image& 			m_texture;
 	};
 
 	template<typename T = ImgCreateTextureSamplerInfo>

@@ -92,7 +92,7 @@ namespace vvh {
     struct BufDestroyBuffer2Info {
 		const VkDevice& 	m_device;
 		const VmaAllocator& m_vmaAllocator;
-		const Buffer& 		m_buffers;
+		Buffer& 		m_buffers;
 	};
 
 	template<typename T = BufDestroyBuffer2Info>

@@ -269,7 +269,7 @@ namespace vvh {
 	struct DevDestroyDebugUtilsMessengerEXTInfo {
 		const VkInstance& 				m_instance;
 		const VkDebugUtilsMessengerEXT& m_debugMessenger;
-		const VkAllocationCallbacks*& 	m_pAllocator;
+		const VkAllocationCallbacks* 	m_pAllocator;
 	};
 
 	template<typename T = DevDestroyDebugUtilsMessengerEXTInfo> 

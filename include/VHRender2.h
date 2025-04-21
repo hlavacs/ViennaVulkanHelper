@@ -210,7 +210,7 @@ namespace vvh {
 
     struct RenUpdateDescriptorSetTextureInfo { 
 		VkDevice& 		m_device;
-		Map& 			m_texture;
+		Image& 			m_texture;
 		size_t&			m_binding;
 		DescriptorSet& 	m_descriptorSet;
 	};

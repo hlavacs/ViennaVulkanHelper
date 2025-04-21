@@ -155,7 +155,7 @@ namespace vvh {
         VkImageView     m_depthImageView;
     };
 
-    struct Map {
+    struct Image {
 		int 			m_width;
 		int				m_height;
 		int				m_layers;

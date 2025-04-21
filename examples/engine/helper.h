@@ -164,7 +164,7 @@ namespace vhe {
 	    std::string         m_name;
 	    vvh::BufferPerObjectTexture m_ubo; 
 	    vvh::Buffer          m_uniformBuffers;
-	    vvh::Map             m_texture;
+	    vvh::Image           m_texture;
 	    vvh::Mesh            m_mesh;
 	    std::vector<VkDescriptorSet> m_descriptorSets;
 
