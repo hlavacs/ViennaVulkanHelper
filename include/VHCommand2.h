@@ -219,7 +219,7 @@ namespace vvh {
     struct ComRecordObjectInfo {
 		const VkCommandBuffer& 	m_commandBuffer;
 		const Pipeline& 		m_graphicsPipeline;
-		const std::vector<DescriptorSet>& m_descriptorSets;
+		const std::vector<DescriptorSet>&& m_descriptorSets;
 		const std::string 	m_type;
 		const Mesh& 		m_mesh;
 		const uint32_t& 	m_currentFrame;
@@ -236,7 +236,7 @@ namespace vvh {
 
 		for( auto& descriptorSet : info.m_descriptorSets ) {
 			vkCmdBindDescriptorSets(info.m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, info.m_graphicsPipeline.m_pipelineLayout, 
-				info.m_descriptorSet.m_set, 1, &info.m_descriptorSet.m_descriptorSetPerFrameInFlight[info.m_currentFrame], 0, nullptr);
+				descriptorSet.m_set, 1, &descriptorSet.m_descriptorSetPerFrameInFlight[info.m_currentFrame], 0, nullptr);
 		}
 
 		vkCmdDrawIndexed(info.m_commandBuffer, static_cast<uint32_t>(info.m_mesh.m_indices.size()), 1, 0, 0, 0);
