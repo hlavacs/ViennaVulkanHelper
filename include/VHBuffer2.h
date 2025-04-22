@@ -229,7 +229,7 @@ namespace vvh {
 		const VmaAllocator& 	m_vmaAllocator;
         const VkQueue&			m_graphicsQueue;
 		const VkCommandPool& 	m_commandPool;
-		const Mesh& 			m_mesh;
+		Mesh& 					m_mesh;
 	};
 
 	template<typename T = BufCreateVertexBufferInfo>
@@ -276,7 +276,7 @@ namespace vvh {
 		const VmaAllocator& 	m_vmaAllocator;
 		const VkQueue& 			m_graphicsQueue;
 		const VkCommandPool& 	m_commandPool;
-		const Mesh& 			m_mesh;
+		Mesh& 					m_mesh;
 	};
 
 	template<typename T = BufCreateIndexBufferinfo>

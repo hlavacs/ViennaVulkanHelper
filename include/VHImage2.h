@@ -434,7 +434,7 @@ namespace vvh {
     	const unsigned char * 	m_bufferData; 
 		const uint32_t& m_width; 
 		const uint32_t&	m_height; 
-		const uint32_t& m_imageSize; 
+		const uint32_t& m_size; 
 		const int& 		m_r; 
 		const int& 		m_g; 
 		const int& 		m_b; 
