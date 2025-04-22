@@ -213,7 +213,7 @@ namespace vvh {
 		std::vector<glm::vec4> m_colors;
 		std::vector<glm::vec3> m_tangents;
 
-		std::string getType() {
+		std::string getType() const {
 			std::string name;
 			if( m_positions.size() > 0 ) name = name + "P";
 			if( m_normals.size() > 0 )   name = name + "N";
@@ -223,7 +223,7 @@ namespace vvh {
 			return name;
 		}
 
-		VkDeviceSize getSize() {
+		VkDeviceSize getSize() const {
 			return 	m_positions.size() * sizeof(glm::vec3) + 
 					m_normals.size()   * sizeof(glm::vec3) + 
 					m_texCoords.size() * sizeof(glm::vec2) + 
@@ -231,7 +231,7 @@ namespace vvh {
 					m_tangents.size()  * sizeof(glm::vec3);
 		}
 
-		VkDeviceSize getSize( std::string type ) {
+		VkDeviceSize getSize( std::string type ) const {
 			return 	type.find("P") != std::string::npos ? m_positions.size() * sizeof(glm::vec3) : 0 + 
 					type.find("N") != std::string::npos ? m_normals.size()   * sizeof(glm::vec3) : 0 + 
 					type.find("U") != std::string::npos ? m_texCoords.size() * sizeof(glm::vec2) : 0 + 
@@ -239,7 +239,7 @@ namespace vvh {
 					type.find("T") != std::string::npos ? m_tangents.size()  * sizeof(glm::vec3) : 0;
 		}
 
-		std::vector<VkDeviceSize> getOffsets() {
+		std::vector<VkDeviceSize> getOffsets() const {
 			size_t offset=0;
 			std::vector<VkDeviceSize> offsets{};
 			if( size_t size = m_positions.size() * size_pos; size > 0 ) { offsets.push_back(offset); offset += size; }
@@ -250,7 +250,7 @@ namespace vvh {
 			return offsets;
 		}
 
-		std::vector<VkDeviceSize> getOffsets( std::string type ) {
+		std::vector<VkDeviceSize> getOffsets( std::string type ) const {
 			size_t offset=0;
 			std::vector<VkDeviceSize> offsets{};
 			if( type.find("P") != std::string::npos ) { offsets.push_back(offset); offset += m_positions.size() * size_pos; }

@@ -67,6 +67,17 @@ FetchContent_Declare(sdl3
 FetchContent_MakeAvailable(sdl3)
 include_directories (${sdl3_SOURCE_DIR}/include)
 
+#--------------------------------- Fetch SDL Mixer ---------------------------------#
+
+set(SDL3_DIR ${SDL3_BINARY_DIR})
+set(BUILD_SHARED_LIBS OFF)
+FetchContent_Declare(sdlmixer
+                    GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
+                    GIT_TAG main
+)
+FetchContent_MakeAvailable(sdlmixer)
+include_directories (${sdlmixer_SOURCE_DIR}/include)
+
 #--------------------------------- Fetch ImGui ---------------------------------#
 
 FetchContent_Declare(imgui
