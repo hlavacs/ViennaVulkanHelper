@@ -209,10 +209,10 @@ namespace vvh {
 	//---------------------------------------------------------------------------------------------
 
     struct RenUpdateDescriptorSetTextureInfo { 
-		VkDevice& 		m_device;
-		Image& 			m_texture;
-		size_t&			m_binding;
-		DescriptorSet& 	m_descriptorSet;
+		const VkDevice& 		m_device;
+		const Image& 			m_texture;
+		const size_t&			m_binding;
+		const DescriptorSet& 	m_descriptorSet;
 	};
 
 	template<typename T = RenUpdateDescriptorSetTextureInfo>
