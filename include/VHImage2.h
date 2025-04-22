@@ -203,7 +203,7 @@ namespace vvh {
 
 	struct ImgCreateTextureImageViewinfo {
 		const VkDevice& m_device;
-		const Image& m_texture;
+		Image& m_texture;
 	};
 	
 	template<typename T = ImgCreateTextureImageViewinfo>
