@@ -151,23 +151,7 @@ namespace vvh {
         return imageView;
     }
 
-		//---------------------------------------------------------------------------------------------
 
-		struct ImgCreateTextureImageViewinfo {
-			const VkDevice& m_device;
-			const Image& m_texture;
-		};
-	
-		template<typename T = ImgCreateTextureImageViewinfo>
-		inline void ImgCreateTextureImageView(T&& info) {
-			info.m_texture.m_mapImageView = ImgCreateImageView({
-				.m_device 	= info.m_device, 
-				.m_image 	= info.m_texture.m_mapImage, 
-				.m_format 	= VK_FORMAT_R8G8B8A8_SRGB,
-				.m_aspects 	= VK_IMAGE_ASPECT_COLOR_BIT
-			});
-		}
-	  
 	//---------------------------------------------------------------------------------------------
 	
 	struct ImgCreateImageView2Info {
@@ -189,6 +173,23 @@ namespace vvh {
 		});
 	}
 	
+	//---------------------------------------------------------------------------------------------
+
+	struct ImgCreateTextureImageViewinfo {
+		const VkDevice& m_device;
+		const Image& m_texture;
+	};
+	
+	template<typename T = ImgCreateTextureImageViewinfo>
+	inline void ImgCreateTextureImageView(T&& info) {
+		info.m_texture.m_mapImageView = ImgCreateImageView2({
+			.m_device 	= info.m_device, 
+			.m_image 	= info.m_texture.m_mapImage, 
+			.m_format 	= VK_FORMAT_R8G8B8A8_SRGB,
+			.m_aspects 	= VK_IMAGE_ASPECT_COLOR_BIT
+		});
+	}
+	  
 	//---------------------------------------------------------------------------------------------
 
 	struct ImgCreateImageInfo {
