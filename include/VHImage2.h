@@ -112,88 +112,6 @@ namespace vvh {
 		}
     
 	//---------------------------------------------------------------------------------------------
-	struct ImgCreateTextureImageInfo {
-		const VkPhysicalDevice& m_physicalDevice;
-		const VkDevice& 		m_device;
-		const VmaAllocator& 	m_vmaAllocator;
-		const VkQueue& 			m_graphicsQueue;
-		const VkCommandPool& 	m_commandPool;
-		const void* 			m_pixels;
-		const int& 				m_width;
-		const int& 				m_height;
-		const size_t& 			m_size;
-		const Image& 			m_texture;
-	};
-
-	template<typename T = ImgCreateTextureImageInfo>
-	inline void ImgCreateTextureImage(T&& info) {
-
-        VkBuffer stagingBuffer;
-        VmaAllocation stagingBufferAllocation;
-        VmaAllocationInfo allocInfo;
-        BufCreateBuffer( {
-			.m_vmaAllocator 	= info.m_vmaAllocator, 
-			.m_size 			= info.m_size, 
-			.m_usageFlags 		= VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
-			.m_properties 		= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
-			.m_vmaFlags 		= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, 
-			.m_buffer 			= stagingBuffer, 
-			.m_allocation 		= stagingBufferAllocation, 
-			.m_allocationInfo 	= &allocInfo
-		});
-
-        memcpy(allocInfo.pMappedData, info.m_pixels, info.m_size);
-
-        ImgCreateImage(
-			info.m_physicalDevice, 
-			info.m_device, 
-			info.m_vmaAllocator, 
-			info.m_width, 
-			info.m_height, 
-			VK_FORMAT_R8G8B8A8_SRGB, 
-			VK_IMAGE_TILING_OPTIMAL, 
-			VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            VK_IMAGE_LAYOUT_UNDEFINED,
-            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			info.m_texture.m_mapImage,
-			info.m_texture.m_mapImageAllocation
-		); 
-		
-        ImgTransitionImageLayout2({
-			info.m_device, 
-			info.m_graphicsQueue, 
-			info.m_commandPool, 
-			info.m_texture.m_mapImage, 
-			VK_FORMAT_R8G8B8A8_SRGB, 
-			VK_IMAGE_LAYOUT_UNDEFINED, 
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-		});
-    
-        BufCopyBufferToImage({
-			.m_device 			= info.m_device, 
-			.m_graphicsQueue 	= info.m_graphicsQueue, 
-			.m_commandPool 		= info.m_commandPool, 
-			.m_buffer 			= stagingBuffer, 
-			.m_image 			= info.m_texture.m_mapImage, 
-			.m_width 			= static_cast<uint32_t>(info.m_width), 
-			.m_height 			= static_cast<uint32_t>(info.m_height)
-		});
-
-        ImgTransitionImageLayout2({
-			info.m_device, 
-			info.m_graphicsQueue, 
-			info.m_commandPool, 
-			info.m_texture.m_mapImage, 
-			VK_FORMAT_R8G8B8A8_SRGB, 
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
-			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-		});
-
-        BufDestroyBuffer({info.m_device, info.m_vmaAllocator, stagingBuffer, stagingBufferAllocation});
-    }
-
-
-	//---------------------------------------------------------------------------------------------
 
 	struct ImgCreateTextureSamplerInfo {
 		const VkPhysicalDevice& m_physicalDevice;
@@ -379,6 +297,88 @@ namespace vvh {
 					.m_imageAllocation 	= info.m_imageAllocation
 				});
 	}
+
+	//---------------------------------------------------------------------------------------------
+	
+	struct ImgCreateTextureImageInfo {
+		const VkPhysicalDevice& m_physicalDevice;
+		const VkDevice& 		m_device;
+		const VmaAllocator& 	m_vmaAllocator;
+		const VkQueue& 			m_graphicsQueue;
+		const VkCommandPool& 	m_commandPool;
+		const void* 			m_pixels;
+		const int& 				m_width;
+		const int& 				m_height;
+		const size_t& 			m_size;
+		Image& 					m_texture;
+	};
+
+	template<typename T = ImgCreateTextureImageInfo>
+	inline void ImgCreateTextureImage(T&& info) {
+
+        VkBuffer stagingBuffer;
+        VmaAllocation stagingBufferAllocation;
+        VmaAllocationInfo allocInfo;
+        BufCreateBuffer( {
+			.m_vmaAllocator 	= info.m_vmaAllocator, 
+			.m_size 			= info.m_size, 
+			.m_usageFlags 		= VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+			.m_properties 		= VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
+			.m_vmaFlags 		= VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT, 
+			.m_buffer 			= stagingBuffer, 
+			.m_allocation 		= stagingBufferAllocation, 
+			.m_allocationInfo 	= &allocInfo
+		});
+
+        memcpy(allocInfo.pMappedData, info.m_pixels, info.m_size);
+
+        ImgCreateImage2({
+			info.m_physicalDevice, 
+			info.m_device, 
+			info.m_vmaAllocator, 
+			(uint32_t)info.m_width, 
+			(uint32_t)info.m_height, 
+			VK_FORMAT_R8G8B8A8_SRGB, 
+			VK_IMAGE_TILING_OPTIMAL, 
+			VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			info.m_texture.m_mapImage,
+			info.m_texture.m_mapImageAllocation
+		}); 
+		
+        ImgTransitionImageLayout2({
+			info.m_device, 
+			info.m_graphicsQueue, 
+			info.m_commandPool, 
+			info.m_texture.m_mapImage, 
+			VK_FORMAT_R8G8B8A8_SRGB, 
+			VK_IMAGE_LAYOUT_UNDEFINED, 
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+		});
+    
+        BufCopyBufferToImage({
+			.m_device 			= info.m_device, 
+			.m_graphicsQueue 	= info.m_graphicsQueue, 
+			.m_commandPool 		= info.m_commandPool, 
+			.m_buffer 			= stagingBuffer, 
+			.m_image 			= info.m_texture.m_mapImage, 
+			.m_width 			= static_cast<uint32_t>(info.m_width), 
+			.m_height 			= static_cast<uint32_t>(info.m_height)
+		});
+
+        ImgTransitionImageLayout2({
+			info.m_device, 
+			info.m_graphicsQueue, 
+			info.m_commandPool, 
+			info.m_texture.m_mapImage, 
+			VK_FORMAT_R8G8B8A8_SRGB, 
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+		});
+
+        BufDestroyBuffer({info.m_device, info.m_vmaAllocator, stagingBuffer, stagingBufferAllocation});
+    }
 
 	//---------------------------------------------------------------------------------------------
 
