@@ -14,7 +14,7 @@ namespace vvh {
 		const int& 				m_width;
 		const int& 				m_height;
 		const size_t& 			m_size;
-		const VkImage& 			m_texture;
+		const Image& 			m_texture;
 	};
 
 	template<typename T = ImgCreateTextureImageInfo>
