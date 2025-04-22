@@ -2,6 +2,114 @@
 
 
 namespace vvh {
+
+		//---------------------------------------------------------------------------------------------
+
+		struct ImgTransitionImageLayoutInfo {
+			const VkDevice& m_device; 
+			const VkQueue& m_graphicsQueue; 
+			const VkCommandPool& m_commandPool;
+			const VkImage& m_image; 
+			const VkFormat& m_format;
+			const VkImageAspectFlags& m_aspect; 
+			const int& m_mipLevels; 
+			const int& m_layers;
+			const VkImageLayout& m_oldLayout; 
+			const VkImageLayout& m_newLayout;
+		};
+	
+		template<typename T = ImgTransitionImageLayoutInfo>
+		inline void ImgTransitionImageLayout(T&& info) {
+		   VkCommandBuffer commandBuffer = ComBeginSingleTimeCommands(info);
+	
+		   VkImageMemoryBarrier barrier{};
+		   barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		   barrier.oldLayout = info.m_oldLayout;
+		   barrier.newLayout = info.m_newLayout;
+		   barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		   barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		   barrier.image = info.m_image;
+		   barrier.subresourceRange.aspectMask = info.m_aspect;
+		   barrier.subresourceRange.baseMipLevel = 0;
+		   barrier.subresourceRange.levelCount = info.m_mipLevels;
+		   barrier.subresourceRange.baseArrayLayer = 0;
+		   barrier.subresourceRange.layerCount = info.m_layers;
+	
+		   VkPipelineStageFlags sourceStage;
+		   VkPipelineStageFlags destinationStage;
+	
+		   if (info.m_oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && info.m_newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+			   barrier.srcAccessMask = 0;
+			   barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+			   sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+			   destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		   } else if (info.m_oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && info.m_newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+			   barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+			   barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+			   sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+			   destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		   } else if(info.m_oldLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL && info.m_newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR) {
+			   barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			   barrier.dstAccessMask = 0;
+			   sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			   destinationStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+		   } else if(info.m_oldLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR && info.m_newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) {
+			   barrier.srcAccessMask = 0;
+			   barrier.dstAccessMask = 0;
+			   sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			   destinationStage = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		   } else if(info.m_oldLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL && info.m_newLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
+			   barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			   barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
+			   sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			   destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		   } else {
+			   barrier.srcAccessMask = 0;
+			   barrier.dstAccessMask = 0;
+			   sourceStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+			   destinationStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+		   }
+	
+		   vkCmdPipelineBarrier(
+				 commandBuffer,
+				 sourceStage, 
+				 destinationStage,
+				 0,
+				 0, nullptr,
+				 0, nullptr,
+				 1, &barrier
+		   );
+	
+		   ComEndSingleTimeCommands({info.m_device, info.m_graphicsQueue, info.m_commandPool, commandBuffer});
+	   }
+	
+		//---------------------------------------------------------------------------------------------
+		
+		struct ImgTransitionImageLayout2Info {
+			const VkDevice& m_device; 
+			const VkQueue& m_graphicsQueue; 
+			const VkCommandPool& m_commandPool;
+			const VkImage& m_image; 
+			const VkFormat& m_format; 
+			const VkImageLayout& m_oldLayout; 
+			const VkImageLayout& m_newLayout;
+		};
+	
+		template<typename T = ImgTransitionImageLayout2Info>
+		inline void ImgTransitionImageLayout2(T&& info) {
+			ImgTransitionImageLayout( {
+				info.m_device, 
+				info.m_graphicsQueue, 
+				info.m_commandPool, 
+				info.m_image, 
+				info.m_format, 
+				VK_IMAGE_ASPECT_COLOR_BIT, 
+				1, 
+				1, 
+				info.m_oldLayout, 
+				info.m_newLayout
+			});
+		}
     
 	//---------------------------------------------------------------------------------------------
 	struct ImgCreateTextureImageInfo {
@@ -51,7 +159,7 @@ namespace vvh {
 			info.m_texture.m_mapImageAllocation
 		); 
 		
-        ImgTransitionImageLayout(
+        ImgTransitionImageLayout2({
 			info.m_device, 
 			info.m_graphicsQueue, 
 			info.m_commandPool, 
@@ -59,7 +167,7 @@ namespace vvh {
 			VK_FORMAT_R8G8B8A8_SRGB, 
 			VK_IMAGE_LAYOUT_UNDEFINED, 
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-		);
+		});
     
         BufCopyBufferToImage({
 			.m_device 			= info.m_device, 
@@ -71,7 +179,7 @@ namespace vvh {
 			.m_height 			= static_cast<uint32_t>(info.m_height)
 		});
 
-        ImgTransitionImageLayout(
+        ImgTransitionImageLayout2({
 			info.m_device, 
 			info.m_graphicsQueue, 
 			info.m_commandPool, 
@@ -79,7 +187,7 @@ namespace vvh {
 			VK_FORMAT_R8G8B8A8_SRGB, 
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
 			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-		);
+		});
 
         BufDestroyBuffer({info.m_device, info.m_vmaAllocator, stagingBuffer, stagingBufferAllocation});
     }
@@ -90,7 +198,7 @@ namespace vvh {
 	struct ImgCreateTextureSamplerInfo {
 		const VkPhysicalDevice& m_physicalDevice;
 		const VkDevice& 		m_device;
-		const Image& 			m_texture;
+		Image& 					m_texture;
 	};
 
 	template<typename T = ImgCreateTextureSamplerInfo>
@@ -286,113 +394,6 @@ namespace vvh {
         vmaDestroyImage(info.m_vmaAllocator, info.m_image, info.m_imageAllocation);
     }
 
-	//---------------------------------------------------------------------------------------------
-
-    struct ImgTransitionImageLayoutInfo {
-		const VkDevice& m_device; 
-		const VkQueue& m_graphicsQueue; 
-		const VkCommandPool& m_commandPool;
-		const VkImage& m_image; 
-		const VkFormat& m_format;
-		const VkImageAspectFlags& m_aspect; 
-		const int& m_mipLevels; 
-		const int& m_layers;
-    	const VkImageLayout& m_oldLayout; 
-		const VkImageLayout& m_newLayout;
-	};
-
-	template<typename T = ImgTransitionImageLayoutInfo>
-	inline void ImgTransitionImageLayout(T&& info) {
-	   VkCommandBuffer commandBuffer = ComBeginSingleTimeCommands(info);
-
-	   VkImageMemoryBarrier barrier{};
-	   barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-	   barrier.oldLayout = info.m_oldLayout;
-	   barrier.newLayout = info.m_newLayout;
-	   barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	   barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-	   barrier.image = info.m_image;
-	   barrier.subresourceRange.aspectMask = info.m_aspect;
-	   barrier.subresourceRange.baseMipLevel = 0;
-	   barrier.subresourceRange.levelCount = info.m_mipLevels;
-	   barrier.subresourceRange.baseArrayLayer = 0;
-	   barrier.subresourceRange.layerCount = info.m_layers;
-
-	   VkPipelineStageFlags sourceStage;
-	   VkPipelineStageFlags destinationStage;
-
-	   if (info.m_oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && info.m_newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
-		   barrier.srcAccessMask = 0;
-		   barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-		   sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-		   destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-	   } else if (info.m_oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && info.m_newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
-		   barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-		   barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-		   sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
-		   destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-	   } else if(info.m_oldLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL && info.m_newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR) {
-		   barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		   barrier.dstAccessMask = 0;
-		   sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		   destinationStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-	   } else if(info.m_oldLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR && info.m_newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) {
-		   barrier.srcAccessMask = 0;
-		   barrier.dstAccessMask = 0;
-		   sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		   destinationStage = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-	   } else if(info.m_oldLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL && info.m_newLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
-		   barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-		   barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
-		   sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		   destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-	   } else {
-		   barrier.srcAccessMask = 0;
-		   barrier.dstAccessMask = 0;
-		   sourceStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
-		   destinationStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-	   }
-
-	   vkCmdPipelineBarrier(
-			 commandBuffer,
-			 sourceStage, 
-			 destinationStage,
-			 0,
-			 0, nullptr,
-			 0, nullptr,
-			 1, &barrier
-	   );
-
-	   ComEndSingleTimeCommands({info.m_device, info.m_graphicsQueue, info.m_commandPool, commandBuffer});
-   }
-
-	//---------------------------------------------------------------------------------------------
-	
-    struct ImgTransitionImageLayout2Info {
-		const VkDevice& m_device; 
-		const VkQueue& m_graphicsQueue; 
-		const VkCommandPool& m_commandPool;
-        const VkImage& m_image; 
-		const VkFormat& m_format; 
-		const VkImageLayout& m_oldLayout; 
-		const VkImageLayout& m_newLayout;
-	};
-
-	template<typename T = ImgTransitionImageLayout2Info>
-	inline void ImgTransitionImageLayout2(T&& info) {
-		ImgTransitionImageLayout( {
-			info.m_device, 
-			info.m_graphicsQueue, 
-			info.m_commandPool, 
-			info.m_image, 
-			info.m_format, 
-			VK_IMAGE_ASPECT_COLOR_BIT, 
-			1, 
-			1, 
-			info.m_oldLayout, 
-			info.m_newLayout
-		});
-	}
 	
 	//---------------------------------------------------------------------------------------------
 
