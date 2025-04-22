@@ -84,23 +84,7 @@ namespace vvh {
         BufDestroyBuffer({info.m_device, info.m_vmaAllocator, stagingBuffer, stagingBufferAllocation});
     }
 
-	//---------------------------------------------------------------------------------------------
 
-    struct ImgCreateTextureImageViewinfo {
-		const VkDevice& m_device;
-		const Image& m_texture;
-	};
-
-	template<typename T = ImgCreateTextureImageViewinfo>
-	inline void ImgCreateTextureImageView(T&& info) {
-		info.m_texture.m_mapImageView = ImgCreateImageView({
-			.m_device 	= info.m_device, 
-			.m_image 	= info.m_texture.m_mapImage, 
-			.m_format 	= VK_FORMAT_R8G8B8A8_SRGB,
-			.m_aspects 	= VK_IMAGE_ASPECT_COLOR_BIT
-		});
-	}
-  
 	//---------------------------------------------------------------------------------------------
 
 	struct ImgCreateTextureSamplerInfo {
@@ -167,6 +151,23 @@ namespace vvh {
         return imageView;
     }
 
+		//---------------------------------------------------------------------------------------------
+
+		struct ImgCreateTextureImageViewinfo {
+			const VkDevice& m_device;
+			const Image& m_texture;
+		};
+	
+		template<typename T = ImgCreateTextureImageViewinfo>
+		inline void ImgCreateTextureImageView(T&& info) {
+			info.m_texture.m_mapImageView = ImgCreateImageView({
+				.m_device 	= info.m_device, 
+				.m_image 	= info.m_texture.m_mapImage, 
+				.m_format 	= VK_FORMAT_R8G8B8A8_SRGB,
+				.m_aspects 	= VK_IMAGE_ASPECT_COLOR_BIT
+			});
+		}
+	  
 	//---------------------------------------------------------------------------------------------
 	
 	struct ImgCreateImageView2Info {
