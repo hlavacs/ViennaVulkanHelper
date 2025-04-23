@@ -147,6 +147,39 @@ namespace vvh {
 
  	//---------------------------------------------------------------------------------------------
 
+	struct ImgCreateImageSamplerInfo {
+		const VkPhysicalDevice& m_physicalDevice;
+		const VkDevice& m_device;
+		VkSampler& m_sampler;
+	};
+
+	template<typename T = ImgCreateImageSamplerInfo>
+	inline void ImgCreateImageSampler(T&& info) {
+		VkPhysicalDeviceProperties properties{};
+		vkGetPhysicalDeviceProperties(info.m_physicalDevice, &properties);
+
+		VkSamplerCreateInfo samplerInfo{};
+		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+		samplerInfo.magFilter = VK_FILTER_NEAREST;
+		samplerInfo.minFilter = VK_FILTER_NEAREST;
+		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		samplerInfo.anisotropyEnable = VK_FALSE;
+		samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+		samplerInfo.unnormalizedCoordinates = VK_FALSE;
+		samplerInfo.compareEnable = VK_FALSE;
+		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+
+		if (vkCreateSampler(info.m_device, &samplerInfo, nullptr, &info.m_sampler) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create image sampler!");
+		}
+	}
+
+	//---------------------------------------------------------------------------------------------
+
 	struct ImgCreateImageViewInfo {
 		const VkDevice& 			m_device;
 		const VkImage& 				m_image;

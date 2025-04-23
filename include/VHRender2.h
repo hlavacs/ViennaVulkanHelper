@@ -85,6 +85,89 @@ namespace vvh {
 
 	//---------------------------------------------------------------------------------------------
 
+    struct RenCreateRenderPassGeometryInfo {
+        const VkFormat&             m_depthFormat;
+        const VkDevice&             m_device;
+        const SwapChain&            m_swapChain;
+        const bool&                 m_clear;
+        VkRenderPass&               m_renderPass;
+    };
+
+    template<typename T = RenCreateRenderPassGeometryInfo>
+    inline void RenCreateRenderPassGeometry(T&& info) {
+        std::array<VkAttachmentDescription, 4> attachments{};
+        // Position
+        attachments[0].format = info.m_swapChain.m_swapChainImageFormat;
+        attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
+        attachments[0].loadOp = info.m_clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+        attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachments[0].initialLayout = info.m_clear ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        attachments[0].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        // Normals
+        attachments[1].format = info.m_swapChain.m_swapChainImageFormat;
+        attachments[1].samples = VK_SAMPLE_COUNT_1_BIT;
+        attachments[1].loadOp = info.m_clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+        attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        attachments[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachments[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachments[1].initialLayout = info.m_clear ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        attachments[1].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        // Albedo
+        attachments[2].format = VK_FORMAT_R8G8B8A8_UNORM;
+        attachments[2].samples = VK_SAMPLE_COUNT_1_BIT;
+        attachments[2].loadOp = info.m_clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+        attachments[2].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        attachments[2].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachments[2].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachments[2].initialLayout = info.m_clear ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        attachments[2].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        // Depth
+        attachments[3].format = info.m_depthFormat;
+        attachments[3].samples = VK_SAMPLE_COUNT_1_BIT;
+        attachments[3].loadOp = info.m_clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+        attachments[3].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        attachments[3].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachments[3].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachments[3].initialLayout = info.m_clear ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        attachments[3].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        std::array<VkAttachmentReference, 3> colorAttachmentRef{};
+        colorAttachmentRef[0].attachment = 0;
+        colorAttachmentRef[0].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        colorAttachmentRef[1].attachment = 1;
+        colorAttachmentRef[1].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        colorAttachmentRef[2].attachment = 2;
+        colorAttachmentRef[2].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        VkAttachmentReference depthAttachmentRef{};
+        depthAttachmentRef.attachment = 3;
+        depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        VkSubpassDescription subpass{};
+        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpass.colorAttachmentCount = static_cast<uint32_t>(colorAttachmentRef.size());
+        subpass.pColorAttachments = colorAttachmentRef.data();
+        subpass.pDepthStencilAttachment = &depthAttachmentRef;
+
+        VkRenderPassCreateInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        renderPassInfo.pAttachments = attachments.data();
+        renderPassInfo.subpassCount = 1;
+        renderPassInfo.pSubpasses = &subpass;
+
+        if (vkCreateRenderPass(info.m_device, &renderPassInfo, nullptr, &info.m_renderPass) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create render pass!");
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------
+
 	struct RenCreateDescriptorSetLayoutInfo {
 		const VkDevice& 									m_device;
 		const std::vector<VkDescriptorSetLayoutBinding>& 	m_bindings;
@@ -536,6 +619,119 @@ namespace vvh {
     }
 
 	//---------------------------------------------------------------------------------------------
+
+    struct RenCreateGBufferResourcesInfo {
+        const VkPhysicalDevice& m_physicalDevice;
+        const VkDevice& m_device;
+        const VmaAllocator& m_vmaAllocator;
+        const SwapChain& m_swapChain;
+        GBufferImage& m_gbufferImage;
+        const VkFormat& m_format;
+        const VkSampler& m_sampler;
+    };
+
+    template<typename T = RenCreateGBufferResourcesInfo>
+    inline void RenCreateGBufferResources(T&& info) {
+        info.m_gbufferImage.m_gbufferFormat = info.m_format;
+        info.m_gbufferImage.m_gbufferSampler = info.m_sampler;
+
+        ImgCreateImage2({
+            .m_physicalDevice   = info.m_physicalDevice,
+            .m_device           = info.m_device,
+            .m_vmaAllocator     = info.m_vmaAllocator,
+            .m_width            = info.m_swapChain.m_swapChainExtent.width,
+            .m_height           = info.m_swapChain.m_swapChainExtent.height,
+            .m_format           = info.m_format,
+            .m_tiling           = VK_IMAGE_TILING_OPTIMAL,
+            .m_usage            = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+            .m_imageLayout      = VK_IMAGE_LAYOUT_UNDEFINED, //  do not change
+            .m_properties       = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            .m_image            = info.m_gbufferImage.m_gbufferImage,
+            .m_imageAllocation  = info.m_gbufferImage.m_gbufferImageAllocation
+            });
+
+        info.m_gbufferImage.m_gbufferImageView = ImgCreateImageView2({
+            .m_device   = info.m_device,
+            .m_image    = info.m_gbufferImage.m_gbufferImage, 
+            .m_format   = info.m_format, 
+            .m_aspects  = VK_IMAGE_ASPECT_COLOR_BIT 
+            });
+    }
+
+    //---------------------------------------------------------------------------------------------
+
+    struct RenUpdateDescriptorSetGBufferAttachmentInfo {
+        const VkDevice&         m_device;
+        const GBufferImage&     m_gbufferImage;
+        const size_t&           m_binding;
+        const DescriptorSet&    m_descriptorSet;
+    };
+
+    template<typename T = RenUpdateDescriptorSetGBufferAttachmentInfo>
+    inline void RenUpdateDescriptorSetGBufferAttachment(T&& info) {
+        size_t i = 0;
+        for (auto& ds : info.m_descriptorSet.m_descriptorSetPerFrameInFlight) {
+
+            VkDescriptorImageInfo imageInfo{};
+            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            //imageInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            imageInfo.imageView = info.m_gbufferImage.m_gbufferImageView;
+            imageInfo.sampler = info.m_gbufferImage.m_gbufferSampler;
+
+            VkWriteDescriptorSet descriptorWrites{};
+
+            descriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites.dstSet = ds;
+            descriptorWrites.dstBinding = static_cast<uint32_t>(info.m_binding);
+            descriptorWrites.dstArrayElement = 0;
+            descriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            descriptorWrites.descriptorCount = 1;
+            descriptorWrites.pImageInfo = &imageInfo;
+
+            vkUpdateDescriptorSets(info.m_device, 1, &descriptorWrites, 0, nullptr);
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------
+
+    struct RenCreateGBufferFrameBuffersInfo {
+        const VkDevice& m_device;
+        const SwapChain& m_swapChain;
+        const std::array<GBufferImage, 3>& m_gBufferAttachs;
+        std::vector<VkFramebuffer>& m_gBufferFrameBuffers;
+        const DepthImage& m_depthImage;
+        const VkRenderPass& m_renderPass;
+    };
+
+    template<typename T = RenCreateGBufferFrameBuffersInfo>
+    inline void RenCreateGBufferFrameBuffers(T&& info) {
+
+        info.m_gBufferFrameBuffers.resize(info.m_swapChain.m_swapChainImageViews.size());
+
+        for (size_t i = 0; i < info.m_gBufferFrameBuffers.size(); i++) {
+            std::array<VkImageView, 4> attachments = {
+                info.m_gBufferAttachs[0].m_gbufferImageView,   // position
+                info.m_gBufferAttachs[1].m_gbufferImageView,   // normals
+                info.m_gBufferAttachs[2].m_gbufferImageView,   // albedo
+                info.m_depthImage.m_depthImageView
+            };
+
+            VkFramebufferCreateInfo framebufferInfo{};
+            framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            framebufferInfo.renderPass = info.m_renderPass;
+            framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+            framebufferInfo.pAttachments = attachments.data();
+            framebufferInfo.width = info.m_swapChain.m_swapChainExtent.width;
+            framebufferInfo.height = info.m_swapChain.m_swapChainExtent.height;
+            framebufferInfo.layers = 1;
+
+            if (vkCreateFramebuffer(info.m_device, &framebufferInfo, nullptr, &info.m_gBufferFrameBuffers[i]) != VK_SUCCESS) {
+                throw std::runtime_error("failed to create framebuffer!");
+            }
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------
 
 	inline bool RenHasStencilComponent(VkFormat format) {
         return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;

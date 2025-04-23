@@ -321,6 +321,81 @@ namespace vvh {
         return vkQueuePresentKHR(info.m_presentQueue, &presentInfo);
 	}
 
+	//---------------------------------------------------------------------------------------------
+
+	struct ComStartRecordCommandBufferClearValueInfo {
+		VkCommandBuffer&					m_commandBuffer;
+		const uint32_t&						m_imageIndex;
+		const SwapChain&					m_swapChain;
+		const std::vector<VkFramebuffer>&	m_gBufferFramebuffers;
+		const VkRenderPass&					m_renderPass;
+		const std::vector<VkClearValue>&	m_clearValues;
+		const uint32_t&						m_currentFrame;
+	};
+
+	// Used by deferred renderer
+	template<typename T = ComStartRecordCommandBufferClearValueInfo>
+	inline void ComStartRecordCommandBufferClearValue(T&& info) {
+
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+		if (vkBeginCommandBuffer(info.m_commandBuffer, &beginInfo) != VK_SUCCESS) {
+			throw std::runtime_error("failed to begin recording command buffer!");
+		}
+
+		VkRenderPassBeginInfo renderPassInfo{};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassInfo.renderPass = info.m_renderPass;
+		renderPassInfo.framebuffer = info.m_gBufferFramebuffers[info.m_imageIndex];
+		renderPassInfo.renderArea.offset = { 0, 0 };
+		renderPassInfo.renderArea.extent = info.m_swapChain.m_swapChainExtent;
+
+		if (info.m_clearValues.size()) {
+			renderPassInfo.clearValueCount = static_cast<uint32_t>(info.m_clearValues.size());
+			renderPassInfo.pClearValues = info.m_clearValues.data();
+		}
+
+		vkCmdBeginRenderPass(info.m_commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	}
+
+	//---------------------------------------------------------------------------------------------
+
+	struct ComStartRecordCommandBuffer2Info {
+		VkCommandBuffer&	m_commandBuffer;
+		const uint32_t&		m_imageIndex;
+		const SwapChain&	m_swapChain;
+		const VkRenderPass& m_renderPass;
+		bool				m_clear;
+		const glm::vec4&	m_clearValues;
+		const uint32_t&		m_currentFrame;
+	};
+
+	// Used for cmdBuf that already is running
+	template<typename T = ComStartRecordCommandBuffer2Info>
+	inline void ComStartRecordCommandBuffer2(T&& info) {
+
+		VkRenderPassBeginInfo renderPassInfo{};
+		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassInfo.renderPass = info.m_renderPass;
+		renderPassInfo.framebuffer = info.m_swapChain.m_swapChainFramebuffers[info.m_imageIndex];
+		renderPassInfo.renderArea.offset = { 0, 0 };
+		renderPassInfo.renderArea.extent = info.m_swapChain.m_swapChainExtent;
+
+		std::array<VkClearValue, 2> clearValues{};
+		if (info.m_clear) {
+			clearValues[0].color = { {info.m_clearValues.r, info.m_clearValues.g, info.m_clearValues.b, info.m_clearValues.w} };
+			clearValues[1].depthStencil = { 1.0f, 0 };
+
+			renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+			renderPassInfo.pClearValues = clearValues.data();
+		}
+
+		vkCmdBeginRenderPass(info.m_commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	}
+
+	//---------------------------------------------------------------------------------------------
+
 } // namespace vh
 
 
