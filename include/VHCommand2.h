@@ -171,7 +171,7 @@ namespace vvh {
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 		if(viewPorts.size() == 0) viewPorts.push_back(viewport);
-		vkCmdSetViewport(info.m_commandBuffer, 0, viewPorts.size(), viewPorts.data());
+		vkCmdSetViewport(info.m_commandBuffer, 0, static_cast<uint32_t>(viewPorts.size()), viewPorts.data());
   
 
 		std::vector<VkRect2D> scissors = info.m_scissors;
@@ -179,7 +179,7 @@ namespace vvh {
 		scissor.offset = {0, 0};
 		scissor.extent = info.m_swapChain.m_swapChainExtent;
 		if(scissors.size() == 0) scissors.push_back(scissor);
-		vkCmdSetScissor(info.m_commandBuffer, 0, scissors.size(), scissors.data());
+		vkCmdSetScissor(info.m_commandBuffer, 0, static_cast<uint32_t>(scissors.size()), scissors.data());
 
 		vkCmdSetBlendConstants(info.m_commandBuffer, &info.m_blendConstants[0]);
 
@@ -295,7 +295,7 @@ namespace vvh {
 
 			waitSemaphore = &info.m_intermediateSemaphores[i].m_renderFinishedSemaphores[info.m_currentFrame];
 		}
-		  if (vkQueueSubmit(info.m_graphicsQueue, submitInfos.size(), submitInfos.data(), fence) != VK_SUCCESS) {
+		  if (vkQueueSubmit(info.m_graphicsQueue, static_cast<uint32_t>(submitInfos.size()), submitInfos.data(), fence) != VK_SUCCESS) {
 			throw std::runtime_error("failed to submit draw command buffer!");
 		}
 	}

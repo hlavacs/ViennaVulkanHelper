@@ -75,7 +75,7 @@ namespace vvh {
         renderPassInfo.pAttachments = attachments.data();
         renderPassInfo.subpassCount = 1;
         renderPassInfo.pSubpasses = &subpass;
-        renderPassInfo.dependencyCount = dependencies.size();
+        renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
         renderPassInfo.pDependencies = dependencies.data();
 
         if (vkCreateRenderPass(info.m_device, &renderPassInfo, nullptr, &info.m_renderPass) != VK_SUCCESS) {
@@ -313,7 +313,7 @@ namespace vvh {
 
 	        descriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 	        descriptorWrites.dstSet = ds;
-	        descriptorWrites.dstBinding = info.m_binding;
+	        descriptorWrites.dstBinding = static_cast<uint32_t>(info.m_binding);
 	        descriptorWrites.dstArrayElement = 0;
 	        descriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 	        descriptorWrites.descriptorCount = 1;
@@ -456,7 +456,7 @@ namespace vvh {
         colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
         colorBlending.logicOpEnable = VK_FALSE;
         colorBlending.logicOp = VK_LOGIC_OP_COPY;
-        colorBlending.attachmentCount = blendAttachments.size();
+        colorBlending.attachmentCount = static_cast<uint32_t>(blendAttachments.size());
         colorBlending.pAttachments = blendAttachments.data();
         colorBlending.blendConstants[0] = 0.0f;
         colorBlending.blendConstants[1] = 0.0f;
@@ -477,7 +477,7 @@ namespace vvh {
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutInfo.setLayoutCount = (uint32_t)info.m_descriptorSetLayouts.size();
         pipelineLayoutInfo.pSetLayouts = info.m_descriptorSetLayouts.data();
-        pipelineLayoutInfo.pushConstantRangeCount = info.m_pushConstantRanges.size();
+        pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(info.m_pushConstantRanges.size());
         pipelineLayoutInfo.pPushConstantRanges = info.m_pushConstantRanges.size() > 0 ? info.m_pushConstantRanges.data() : nullptr;
 
         if (vkCreatePipelineLayout(info.m_device, &pipelineLayoutInfo, nullptr, &info.m_graphicsPipeline.m_pipelineLayout) != VK_SUCCESS) {
