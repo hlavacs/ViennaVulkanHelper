@@ -622,12 +622,12 @@ namespace vvh {
 
     struct RenCreateGBufferResourcesInfo {
         const VkPhysicalDevice& m_physicalDevice;
-        const VkDevice& m_device;
-        const VmaAllocator& m_vmaAllocator;
-        const SwapChain& m_swapChain;
-        GBufferImage& m_gbufferImage;
-        const VkFormat& m_format;
-        const VkSampler& m_sampler;
+        const VkDevice&         m_device;
+        const VmaAllocator&     m_vmaAllocator;
+        const SwapChain&        m_swapChain;
+        GBufferImage&           m_gbufferImage;
+        const VkFormat&         m_format;
+        const VkSampler&        m_sampler;
     };
 
     template<typename T = RenCreateGBufferResourcesInfo>
