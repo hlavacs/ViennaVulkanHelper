@@ -324,7 +324,7 @@ namespace vvh {
 	//---------------------------------------------------------------------------------------------
 
 	struct ComStartRecordCommandBufferClearValueInfo {
-		VkCommandBuffer&					m_commandBuffer;
+		const VkCommandBuffer&				m_commandBuffer;
 		const uint32_t&						m_imageIndex;
 		const SwapChain&					m_swapChain;
 		const std::vector<VkFramebuffer>&	m_gBufferFramebuffers;
@@ -335,14 +335,7 @@ namespace vvh {
 
 	// Used by deferred renderer
 	template<typename T = ComStartRecordCommandBufferClearValueInfo>
-	inline void ComStartRecordCommandBufferClearValue(T&& info) {
-
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-		if (vkBeginCommandBuffer(info.m_commandBuffer, &beginInfo) != VK_SUCCESS) {
-			throw std::runtime_error("failed to begin recording command buffer!");
-		}
+	inline void ComBeginRenderPass2(T&& info) {
 
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
