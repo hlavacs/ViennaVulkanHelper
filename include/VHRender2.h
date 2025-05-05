@@ -97,7 +97,7 @@ namespace vvh {
     inline void RenCreateRenderPassGeometry(T&& info) {
         std::array<VkAttachmentDescription, 4> attachments{};
         // Position
-        attachments[0].format = info.m_swapChain.m_swapChainImageFormat;
+        attachments[0].format = VK_FORMAT_R32G32B32A32_SFLOAT;
         attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
         attachments[0].loadOp = info.m_clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
         attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -107,7 +107,7 @@ namespace vvh {
         attachments[0].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
         // Normals
-        attachments[1].format = info.m_swapChain.m_swapChainImageFormat;
+        attachments[1].format = VK_FORMAT_R8G8B8A8_UNORM;
         attachments[1].samples = VK_SAMPLE_COUNT_1_BIT;
         attachments[1].loadOp = info.m_clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
         attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -117,7 +117,7 @@ namespace vvh {
         attachments[1].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
         // Albedo
-        attachments[2].format = VK_FORMAT_R8G8B8A8_UNORM;
+        attachments[2].format = VK_FORMAT_R8G8B8A8_SRGB;
         attachments[2].samples = VK_SAMPLE_COUNT_1_BIT;
         attachments[2].loadOp = info.m_clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
         attachments[2].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
