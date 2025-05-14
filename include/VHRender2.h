@@ -168,6 +168,52 @@ namespace vvh {
 
     //---------------------------------------------------------------------------------------------
 
+    struct RenCreateRenderPassLightingInfo {
+        const VkDevice& m_device;
+        const SwapChain& m_swapChain;
+        const bool& m_clear;
+        VkRenderPass& m_renderPass;
+    };
+
+    template<typename T = RenCreateRenderPassLightingInfo>
+    inline void RenCreateRenderPassLighting(T&& info) {
+        VkAttachmentDescription colorAttachment{};
+        colorAttachment.format = info.m_swapChain.m_swapChainImageFormat;
+        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        colorAttachment.loadOp = info.m_clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        colorAttachment.initialLayout = info.m_clear ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        std::array<VkAttachmentDescription, 1> attachments = { colorAttachment };
+
+        VkAttachmentReference colorAttachmentRef{};
+        colorAttachmentRef.attachment = 0;
+        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        VkSubpassDescription subpass{};
+        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpass.colorAttachmentCount = 1;
+        subpass.pColorAttachments = &colorAttachmentRef;
+
+        VkRenderPassCreateInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        renderPassInfo.pAttachments = attachments.data();
+        renderPassInfo.subpassCount = 1;
+        renderPassInfo.pSubpasses = &subpass;
+        renderPassInfo.dependencyCount = 0;
+        renderPassInfo.pDependencies = nullptr;
+
+        if (vkCreateRenderPass(info.m_device, &renderPassInfo, nullptr, &info.m_renderPass) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create render pass!");
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------
+
 	struct RenCreateDescriptorSetLayoutInfo {
 		const VkDevice& 									m_device;
 		const std::vector<VkDescriptorSetLayoutBinding>& 	m_bindings;
