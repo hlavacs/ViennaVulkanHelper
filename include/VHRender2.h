@@ -684,7 +684,7 @@ namespace vvh {
 			info.m_swapChain.m_swapChainExtent.height, 
 			depthFormat, 
 			VK_IMAGE_TILING_OPTIMAL, 
-			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, 
+			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 			VK_IMAGE_LAYOUT_UNDEFINED, //  Do NOT CHANGE
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
 			info.m_depthImage.m_depthImage, 
@@ -700,6 +700,41 @@ namespace vvh {
     }
 
 	//---------------------------------------------------------------------------------------------
+
+    struct RenUpdateDescriptorSetDepthAttachmentInfo {
+        const VkDevice& m_device;
+        const DepthImage& m_depthImage;
+        const size_t& m_binding;
+        const DescriptorSet& m_descriptorSet;
+        const VkSampler& m_sampler;
+    };
+
+    template<typename T = RenUpdateDescriptorSetDepthAttachmentInfo>
+    inline void RenUpdateDescriptorSetDepthAttachment(T&& info) {
+        size_t i = 0;
+        for (auto& ds : info.m_descriptorSet.m_descriptorSetPerFrameInFlight) {
+
+            VkDescriptorImageInfo imageInfo{};
+            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            //imageInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            imageInfo.imageView = info.m_depthImage.m_depthImageView;
+            imageInfo.sampler = info.m_sampler;
+
+            VkWriteDescriptorSet descriptorWrites{};
+
+            descriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrites.dstSet = ds;
+            descriptorWrites.dstBinding = static_cast<uint32_t>(info.m_binding);
+            descriptorWrites.dstArrayElement = 0;
+            descriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            descriptorWrites.descriptorCount = 1;
+            descriptorWrites.pImageInfo = &imageInfo;
+
+            vkUpdateDescriptorSets(info.m_device, 1, &descriptorWrites, 0, nullptr);
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------
 
     struct RenCreateGBufferResourcesInfo {
         const VkPhysicalDevice& m_physicalDevice;
