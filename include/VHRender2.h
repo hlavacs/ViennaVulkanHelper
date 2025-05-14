@@ -592,6 +592,40 @@ namespace vvh {
 
 	//---------------------------------------------------------------------------------------------
 
+    // Used for deferred lighting
+    struct RenCreateFrameBuffers2Info {
+        const VkDevice& m_device;
+        const VkRenderPass& m_renderPass;
+        SwapChain& m_swapChain;
+        std::vector<VkFramebuffer>& m_frameBuffers;
+    };
+
+    template<typename T = RenCreateFrameBuffers2Info>
+    inline void RenCreateFrameBuffers2(T&& info) {
+        info.m_frameBuffers.resize(info.m_swapChain.m_swapChainImageViews.size());
+
+        for (size_t i = 0; i < info.m_frameBuffers.size(); i++) {
+            std::array<VkImageView, 1> attachments = {
+                info.m_swapChain.m_swapChainImageViews[i]
+            };
+
+            VkFramebufferCreateInfo framebufferInfo{};
+            framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            framebufferInfo.renderPass = info.m_renderPass;
+            framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+            framebufferInfo.pAttachments = attachments.data();
+            framebufferInfo.width = info.m_swapChain.m_swapChainExtent.width;
+            framebufferInfo.height = info.m_swapChain.m_swapChainExtent.height;
+            framebufferInfo.layers = 1;
+
+            if (vkCreateFramebuffer(info.m_device, &framebufferInfo, nullptr, &info.m_frameBuffers[i]) != VK_SUCCESS) {
+                throw std::runtime_error("failed to create framebuffer!");
+            }
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------
+
 	struct RenFindSupportedFormatInfo {
 		const VkPhysicalDevice& 		m_physicalDevice;
 		const std::vector<VkFormat>& 	m_candidates;
