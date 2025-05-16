@@ -3,6 +3,124 @@
 
 namespace vvh {
 
+	//---------------------------------------------------------------------------------------------
+
+	struct ImgTransitionImageLayout3Info {
+		const VkDevice& m_device;
+		const VkQueue& m_graphicsQueue;
+		const VkCommandPool& m_commandPool;
+		const VkImage& m_image;
+		const VkFormat& m_format;
+		const VkImageAspectFlags& m_aspect = VK_IMAGE_ASPECT_COLOR_BIT;
+		const int& m_mipLevels = 1;
+		const int& m_layers = 1;
+		const VkImageLayout& m_oldLayout;
+		const VkImageLayout& m_newLayout;
+		const VkCommandBuffer& m_commandBuffer = VK_NULL_HANDLE;
+	};
+
+	// This is used in the deferred renderer, but can also be used in any transition,
+	// it is just an extension of the existing functions which are backwards compatible
+	// TODO: this could be the only transition function, to not have too many similar functions
+	template<typename T = ImgTransitionImageLayout3Info>
+	inline void ImgTransitionImageLayout3(T&& info) {
+		VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
+		bool reuseComBuf = false;
+		if (info.m_commandBuffer != VK_NULL_HANDLE) {
+			reuseComBuf = true;
+		}
+		else {
+			commandBuffer = ComBeginSingleTimeCommands(info);
+		}
+
+		VkImageMemoryBarrier barrier{};
+		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		barrier.oldLayout = info.m_oldLayout;
+		barrier.newLayout = info.m_newLayout;
+		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.image = info.m_image;
+		barrier.subresourceRange.aspectMask = info.m_aspect;
+		barrier.subresourceRange.baseMipLevel = 0;
+		barrier.subresourceRange.levelCount = info.m_mipLevels;
+		barrier.subresourceRange.baseArrayLayer = 0;
+		barrier.subresourceRange.layerCount = info.m_layers;
+
+		VkPipelineStageFlags sourceStage;
+		VkPipelineStageFlags destinationStage;
+
+		if (info.m_oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && info.m_newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+			barrier.srcAccessMask = 0;
+			barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+			sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+			destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+		}
+		else if (info.m_oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && info.m_newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+			barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+			barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+			sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+			destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		}
+		else if (info.m_oldLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL && info.m_newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR) {
+			barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			barrier.dstAccessMask = 0;
+			sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			destinationStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+		}
+		else if (info.m_oldLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR && info.m_newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) {
+			barrier.srcAccessMask = 0;
+			barrier.dstAccessMask = 0;
+			sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			destinationStage = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+		}
+		else if (info.m_oldLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL && info.m_newLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {
+			barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
+			sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		}
+		else if (info.m_oldLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL && info.m_newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+			barrier.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+			barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+			sourceStage = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+			destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		}
+		else if (info.m_oldLayout == VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL && info.m_newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+			barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+			barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+			sourceStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+		}
+		else if (info.m_oldLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL && info.m_newLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL) {
+			barrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+			barrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+			sourceStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+			destinationStage = VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+		}
+		else {
+			barrier.srcAccessMask = 0;
+			barrier.dstAccessMask = 0;
+			sourceStage = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
+			destinationStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+		}
+
+		vkCmdPipelineBarrier(
+			reuseComBuf ? info.m_commandBuffer : commandBuffer,
+			sourceStage,
+			destinationStage,
+			0,
+			0, nullptr,
+			0, nullptr,
+			1, &barrier
+		);
+
+		if (!reuseComBuf) {
+			ComEndSingleTimeCommands({ info.m_device, info.m_graphicsQueue, info.m_commandPool, commandBuffer });
+		}
+
+	}
+	
+
 		//---------------------------------------------------------------------------------------------
 
 		struct ImgTransitionImageLayoutInfo {
@@ -71,16 +189,16 @@ namespace vvh {
 		   }
 	
 		   vkCmdPipelineBarrier(
-				 commandBuffer,
+			     commandBuffer,
 				 sourceStage, 
 				 destinationStage,
 				 0,
 				 0, nullptr,
 				 0, nullptr,
 				 1, &barrier
-		   );
-	
-		   ComEndSingleTimeCommands({info.m_device, info.m_graphicsQueue, info.m_commandPool, commandBuffer});
+		   );	
+
+		   ComEndSingleTimeCommands({ info.m_device, info.m_graphicsQueue, info.m_commandPool, commandBuffer });
 	   }
 	
 		//---------------------------------------------------------------------------------------------
@@ -103,7 +221,7 @@ namespace vvh {
 				info.m_commandPool, 
 				info.m_image, 
 				info.m_format, 
-				VK_IMAGE_ASPECT_COLOR_BIT, 
+				VK_IMAGE_ASPECT_COLOR_BIT,
 				1, 
 				1, 
 				info.m_oldLayout, 
