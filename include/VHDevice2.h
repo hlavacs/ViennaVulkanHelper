@@ -509,6 +509,86 @@ namespace vvh {
 
 	//---------------------------------------------------------------------------------------------
 
+	// This is used to enable Vulkan 1.3 dynamic rendering
+	// Uses Vulkan 1.3 core
+	struct DevCreateLogicalDevice13Info {
+		const VkSurfaceKHR& m_surface;
+		const VkPhysicalDevice& m_physicalDevice;
+		const std::vector<std::string>& m_validationLayers;
+		const std::vector<std::string>& m_deviceExtensions;
+		const bool& m_debug;
+		QueueFamilyIndices& m_queueFamilies;
+		VkDevice& m_device;
+		VkQueue& m_graphicsQueue;
+		VkQueue& m_presentQueue;
+	};
+
+	// This is used to enable Vulkan 1.3 dynamic rendering
+	template<typename T = DevCreateLogicalDevice13Info>
+	inline void DevCreateLogicalDevice13(T&& info) {
+
+		info.m_queueFamilies = DevFindQueueFamilies(info);
+
+		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+		std::set<uint32_t> uniqueQueueFamilies = { info.m_queueFamilies.graphicsFamily.value(), info.m_queueFamilies.presentFamily.value() };
+
+		float queuePriority = 1.0f;
+		for (uint32_t queueFamily : uniqueQueueFamilies) {
+			VkDeviceQueueCreateInfo queueCreateInfo{};
+			queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			queueCreateInfo.queueFamilyIndex = queueFamily;
+			queueCreateInfo.queueCount = 1;
+			queueCreateInfo.pQueuePriorities = &queuePriority;
+			queueCreateInfos.push_back(queueCreateInfo);
+		}
+
+		VkPhysicalDeviceFeatures deviceFeatures{};
+		deviceFeatures.samplerAnisotropy = VK_TRUE;
+
+		// --- 1.3
+		VkPhysicalDeviceFeatures2  deviceFeatures2{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2 };
+		deviceFeatures2.features = deviceFeatures;
+
+		VkPhysicalDeviceVulkan13Features deviceFeatures13{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES };
+		deviceFeatures13.dynamicRendering = VK_TRUE;
+
+		deviceFeatures2.pNext = &deviceFeatures13;
+		deviceFeatures13.pNext = nullptr;
+
+		VkDeviceCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+
+		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+		createInfo.pQueueCreateInfos = queueCreateInfos.data();
+
+		createInfo.pEnabledFeatures = nullptr;	// was deviceFeatures in DevCreateLogicalDevice
+		createInfo.pNext = &deviceFeatures2;
+
+		auto extensions = ToCharPtr(info.m_deviceExtensions);
+		createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+		createInfo.ppEnabledExtensionNames = extensions.data();
+
+		auto layers = ToCharPtr(info.m_validationLayers);
+		if (info.m_debug) {
+			createInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
+			createInfo.ppEnabledLayerNames = layers.data();
+		}
+		else {
+			createInfo.enabledLayerCount = 0;
+		}
+
+		if (vkCreateDevice(info.m_physicalDevice, &createInfo, nullptr, &info.m_device) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create logical device!");
+		}
+
+		volkLoadDevice(info.m_device);
+
+		vkGetDeviceQueue(info.m_device, info.m_queueFamilies.graphicsFamily.value(), 0, &info.m_graphicsQueue);
+		vkGetDeviceQueue(info.m_device, info.m_queueFamilies.presentFamily.value(), 0, &info.m_presentQueue);
+	}
+
+	//---------------------------------------------------------------------------------------------
+
 	inline auto DevChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats) -> VkSurfaceFormatKHR {
         for (const auto& availableFormat : availableFormats) {
             if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
