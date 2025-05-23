@@ -559,8 +559,7 @@ namespace vvh {
 	//---------------------------------------------------------------------------------------------
 
     struct RenCreateGraphicsPipelineDynamicInfo {
-        const VkDevice&                                         m_device;
-        const VkRenderPass&                                     m_renderPass;
+        const VkDevice&                                         m_device;  
         const std::string&                                      m_vertShaderPath;
         const std::string&                                      m_fragShaderPath;
         const std::vector<VkVertexInputBindingDescription>&     m_bindingDescription;
