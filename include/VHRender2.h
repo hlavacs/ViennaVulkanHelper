@@ -570,6 +570,7 @@ namespace vvh {
         const std::vector<VkPipelineColorBlendAttachmentState>& m_blendAttachments;
         Pipeline&                                               m_graphicsPipeline;
         const std::vector<VkFormat>&                            m_attachmentFormats;
+        const VkFormat&                                         m_depthFormat;
         bool                                                    m_depthWrite = true;
     };
 
@@ -701,9 +702,9 @@ namespace vvh {
         // 1.3 dynamic rendering
         VkPipelineRenderingCreateInfoKHR pipelineRendereringCreateInfo{ VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR };
         pipelineRendereringCreateInfo.pNext = VK_NULL_HANDLE;
-        pipelineRendereringCreateInfo.colorAttachmentCount = info.m_attachmentFormats.size();	// maybe something else?
+        pipelineRendereringCreateInfo.colorAttachmentCount = static_cast<uint32_t>(info.m_attachmentFormats.size());	// maybe something else?
         pipelineRendereringCreateInfo.pColorAttachmentFormats = info.m_attachmentFormats.data();;	// gbuf 1-3 formats? --> pass with info
-        pipelineRendereringCreateInfo.depthAttachmentFormat = RenFindDepthFormat(info.m_device);
+        pipelineRendereringCreateInfo.depthAttachmentFormat = info.m_depthFormat;
 
         VkGraphicsPipelineCreateInfo pipelineInfo{ VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO };
         pipelineInfo.pNext = &pipelineRendereringCreateInfo;	// dynamic rendering
