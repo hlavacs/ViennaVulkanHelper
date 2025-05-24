@@ -700,7 +700,7 @@ namespace vvh {
         }
 
         // 1.3 dynamic rendering
-        VkPipelineRenderingCreateInfoKHR pipelineRendereringCreateInfo{ VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO_KHR };
+        VkPipelineRenderingCreateInfo pipelineRendereringCreateInfo{ VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO };
         pipelineRendereringCreateInfo.pNext = VK_NULL_HANDLE;
         pipelineRendereringCreateInfo.colorAttachmentCount = static_cast<uint32_t>(info.m_attachmentFormats.size());	// maybe something else?
         pipelineRendereringCreateInfo.pColorAttachmentFormats = info.m_attachmentFormats.data();;	// gbuf 1-3 formats? --> pass with info
