@@ -244,6 +244,31 @@ namespace vvh {
 
 	//---------------------------------------------------------------------------------------------
 
+	struct ComRecordLightingInfo {
+		const VkCommandBuffer& m_commandBuffer;
+		const Pipeline& m_graphicsPipeline;
+		const std::vector<DescriptorSet>&& m_descriptorSets;
+		const uint32_t& m_currentFrame;
+	};
+
+	// Draw command in deferred renderer
+	template<typename T = ComRecordLightingInfo>
+	inline void ComRecordLighting(T&& info) {
+		std::vector<VkDescriptorSet> sets;
+		sets.reserve(info.m_descriptorSets.size());
+
+		for (const auto& descriptorSet : info.m_descriptorSets) {
+			sets.push_back(descriptorSet.m_descriptorSetPerFrameInFlight[info.m_currentFrame]);
+		}
+
+		vkCmdBindDescriptorSets(info.m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, info.m_graphicsPipeline.m_pipelineLayout,
+			0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
+
+		vkCmdDraw(info.m_commandBuffer, 3, 1, 0, 0);
+	}
+
+	//---------------------------------------------------------------------------------------------
+
 	struct ComSubmitCommandBuffersInfo {
 		const VkDevice& 					m_device;
 		const VkQueue& 						m_graphicsQueue;
