@@ -181,7 +181,7 @@ namespace vvh {
 		if(scissors.size() == 0) scissors.push_back(scissor);
 		vkCmdSetScissor(info.m_commandBuffer, 0, static_cast<uint32_t>(scissors.size()), scissors.data());
 
-		vkCmdSetBlendConstants(info.m_commandBuffer, &info.m_blendConstants[0]);
+		vkCmdSetBlendConstants(info.m_commandBuffer, info.m_blendConstants.data());
 
 		for( auto& pc : info.m_pushConstants ) {
 			vkCmdPushConstants(info.m_commandBuffer, pc.layout, pc.stageFlags, pc.offset, pc.size, pc.pValues);
