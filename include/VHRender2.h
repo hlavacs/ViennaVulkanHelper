@@ -403,10 +403,13 @@ namespace vvh {
 		const std::vector<int32_t>& 							m_specializationConstants;
 		const std::vector<VkPushConstantRange>& 				m_pushConstantRanges;
 		const std::vector<VkPipelineColorBlendAttachmentState>& m_blendAttachments;
-  		Pipeline&   m_graphicsPipeline;
-        bool        m_depthWrite = true;
+  		Pipeline&                       m_graphicsPipeline;
+        const std::vector<VkFormat>&    m_attachmentFormats = {};
+        const VkFormat&                 m_depthFormat = VK_FORMAT_UNDEFINED;
+        const bool& m_depthWrite = true;
 	};
 
+    // Works for both dynamic and non dynamic rendering, depending on m_renderPass
 	template<typename T = RenCreateGraphicsPipelineInfo>
 	inline void RenCreateGraphicsPipeline(T&& info) {
 
@@ -547,6 +550,17 @@ namespace vvh {
         pipelineInfo.renderPass = info.m_renderPass;
         pipelineInfo.subpass = 0;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+
+        if (info.m_renderPass == VK_NULL_HANDLE) {
+            // 1.3 dynamic rendering
+            VkPipelineRenderingCreateInfo pipelineRendereringCreateInfo{ VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO };
+            pipelineRendereringCreateInfo.pNext = VK_NULL_HANDLE;
+            pipelineRendereringCreateInfo.colorAttachmentCount = static_cast<uint32_t>(info.m_attachmentFormats.size());
+            pipelineRendereringCreateInfo.pColorAttachmentFormats = info.m_attachmentFormats.data();;
+            pipelineRendereringCreateInfo.depthAttachmentFormat = info.m_depthFormat;
+
+            pipelineInfo.pNext = &pipelineRendereringCreateInfo;	// dynamic rendering
+        }
 
         if (vkCreateGraphicsPipelines(info.m_device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &info.m_graphicsPipeline.m_pipeline) != VK_SUCCESS) {
             throw std::runtime_error("failed to create graphics pipeline!");
