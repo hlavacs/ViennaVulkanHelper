@@ -91,61 +91,45 @@ namespace vvh {
         const SwapChain&            m_swapChain;
         const bool&                 m_clear;
         VkRenderPass&               m_renderPass;
+        const std::vector<VkFormat>&      m_formats;
     };
 
     template<typename T = RenCreateRenderPassGeometryInfo>
     inline void RenCreateRenderPassGeometry(T&& info) {
-        std::array<VkAttachmentDescription, 4> attachments{};
-        // Position
-        attachments[0].format = VK_FORMAT_R32G32B32A32_SFLOAT;
-        attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
-        attachments[0].loadOp = info.m_clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-        attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachments[0].initialLayout = info.m_clear ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        attachments[0].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        size_t count = info.m_formats.size();
 
-        // Normals
-        attachments[1].format = VK_FORMAT_R8G8B8A8_UNORM;
-        attachments[1].samples = VK_SAMPLE_COUNT_1_BIT;
-        attachments[1].loadOp = info.m_clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-        attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        attachments[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachments[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachments[1].initialLayout = info.m_clear ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        attachments[1].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        std::vector<VkAttachmentDescription> attachments{};
+        attachments.resize(count + 1);
 
-        // Albedo
-        attachments[2].format = VK_FORMAT_R8G8B8A8_SRGB;
-        attachments[2].samples = VK_SAMPLE_COUNT_1_BIT;
-        attachments[2].loadOp = info.m_clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-        attachments[2].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        attachments[2].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachments[2].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachments[2].initialLayout = info.m_clear ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        attachments[2].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        for (size_t i = 0; i < info.m_formats.size(); ++i) {
+            attachments[i].format = info.m_formats[i];
+            attachments[i].samples = VK_SAMPLE_COUNT_1_BIT;
+            attachments[i].loadOp = info.m_clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+            attachments[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            attachments[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            attachments[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            attachments[i].initialLayout = info.m_clear ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            attachments[i].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        }
 
         // Depth
-        attachments[3].format = info.m_depthFormat;
-        attachments[3].samples = VK_SAMPLE_COUNT_1_BIT;
-        attachments[3].loadOp = info.m_clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
-        attachments[3].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        attachments[3].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        attachments[3].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        attachments[3].initialLayout = info.m_clear ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-        attachments[3].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        attachments[count].format = info.m_depthFormat;
+        attachments[count].samples = VK_SAMPLE_COUNT_1_BIT;
+        attachments[count].loadOp = info.m_clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+        attachments[count].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        attachments[count].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        attachments[count].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        attachments[count].initialLayout = info.m_clear ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        attachments[count].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-        std::array<VkAttachmentReference, 3> colorAttachmentRef{};
-        colorAttachmentRef[0].attachment = 0;
-        colorAttachmentRef[0].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        colorAttachmentRef[1].attachment = 1;
-        colorAttachmentRef[1].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-        colorAttachmentRef[2].attachment = 2;
-        colorAttachmentRef[2].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        std::vector<VkAttachmentReference> colorAttachmentRef{ count };
+        for (uint32_t i = 0; i < count; ++i) {
+            colorAttachmentRef[i].attachment = i;
+            colorAttachmentRef[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        }
 
         VkAttachmentReference depthAttachmentRef{};
-        depthAttachmentRef.attachment = 3;
+        depthAttachmentRef.attachment = static_cast<uint32_t>(count);
         depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
         VkSubpassDescription subpass{};
@@ -827,7 +811,7 @@ namespace vvh {
     struct RenCreateGBufferFrameBuffersInfo {
         const VkDevice& m_device;
         const SwapChain& m_swapChain;
-        const std::array<GBufferImage, 3>& m_gBufferAttachs;
+        const std::vector<GBufferImage>& m_gBufferAttachs;
         std::vector<VkFramebuffer>& m_gBufferFrameBuffers;
         const DepthImage& m_depthImage;
         const VkRenderPass& m_renderPass;
@@ -839,12 +823,12 @@ namespace vvh {
         info.m_gBufferFrameBuffers.resize(info.m_swapChain.m_swapChainImageViews.size());
 
         for (size_t i = 0; i < info.m_gBufferFrameBuffers.size(); i++) {
-            std::array<VkImageView, 4> attachments = {
-                info.m_gBufferAttachs[0].m_gbufferImageView,   // position
-                info.m_gBufferAttachs[1].m_gbufferImageView,   // normals
-                info.m_gBufferAttachs[2].m_gbufferImageView,   // albedo
-                info.m_depthImage.m_depthImageView
-            };
+            std::vector<VkImageView> attachments{};
+            attachments.reserve(info.m_gBufferAttachs.size());
+            for (size_t i = 0; i < info.m_gBufferAttachs.size(); ++i) {
+                attachments.push_back(info.m_gBufferAttachs[i].m_gbufferImageView);
+            }
+            attachments.push_back(info.m_depthImage.m_depthImageView);
 
             VkFramebufferCreateInfo framebufferInfo{};
             framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
