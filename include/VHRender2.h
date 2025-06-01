@@ -98,8 +98,7 @@ namespace vvh {
     inline void RenCreateRenderPassGeometry(T&& info) {
         size_t count = info.m_formats.size();
 
-        std::vector<VkAttachmentDescription> attachments{};
-        attachments.resize(count + 1);
+        std::vector<VkAttachmentDescription> attachments(count + 1);
 
         for (size_t i = 0; i < info.m_formats.size(); ++i) {
             attachments[i].format = info.m_formats[i];
@@ -122,7 +121,7 @@ namespace vvh {
         attachments[count].initialLayout = info.m_clear ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
         attachments[count].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-        std::vector<VkAttachmentReference> colorAttachmentRef{ count };
+        std::vector<VkAttachmentReference> colorAttachmentRef( count );
         for (uint32_t i = 0; i < count; ++i) {
             colorAttachmentRef[i].attachment = i;
             colorAttachmentRef[i].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
