@@ -477,13 +477,26 @@ namespace vvh {
 		VkPhysicalDeviceFeatures deviceFeatures{};
 		deviceFeatures.samplerAnisotropy = VK_TRUE;
 
+		// Combines all enabled features with pNext
+		VkPhysicalDeviceFeatures2  deviceFeatures2{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2 };
+		deviceFeatures2.features = deviceFeatures;
+
+		// --- 1.1
+		VkPhysicalDeviceVulkan11Features deviceFeatures11{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES };
+		deviceFeatures11.shaderDrawParameters = VK_TRUE;
+
+		// All enabled features
+		deviceFeatures2.pNext = &deviceFeatures11;
+		deviceFeatures11.pNext = nullptr;
+
 		VkDeviceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 
 		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 		createInfo.pQueueCreateInfos = queueCreateInfos.data();
 
-		createInfo.pEnabledFeatures = &deviceFeatures;
+		createInfo.pEnabledFeatures = nullptr;
+		createInfo.pNext = &deviceFeatures2;
 
 		auto extensions = ToCharPtr(info.m_deviceExtensions);
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
@@ -545,14 +558,21 @@ namespace vvh {
 		VkPhysicalDeviceFeatures deviceFeatures{};
 		deviceFeatures.samplerAnisotropy = VK_TRUE;
 
-		// --- 1.3
+		// Combines all enabled features with pNext
 		VkPhysicalDeviceFeatures2  deviceFeatures2{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2 };
 		deviceFeatures2.features = deviceFeatures;
 
+		// --- 1.1
+		VkPhysicalDeviceVulkan11Features deviceFeatures11{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES };
+		deviceFeatures11.shaderDrawParameters = VK_TRUE;
+
+		// --- 1.3
 		VkPhysicalDeviceVulkan13Features deviceFeatures13{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES };
 		deviceFeatures13.dynamicRendering = VK_TRUE;
 
-		deviceFeatures2.pNext = &deviceFeatures13;
+		// All enabled features
+		deviceFeatures2.pNext = &deviceFeatures11;
+		deviceFeatures11.pNext = &deviceFeatures13;
 		deviceFeatures13.pNext = nullptr;
 
 		VkDeviceCreateInfo createInfo{};
