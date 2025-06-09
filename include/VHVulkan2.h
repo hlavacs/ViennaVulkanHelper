@@ -58,6 +58,7 @@ namespace vvh {
 		glm::vec4 m_ambientColor{0.0f}; 
 		glm::vec4 m_diffuseColor{0.0f};	
 		glm::vec4 m_specularColor{0.0f};
+		glm::vec4 m_metallicRoughness{0.0f};
 	};
 
 	struct BufferPerObject {
@@ -208,6 +209,7 @@ namespace vvh {
 	/// T...Vertex data contains tangents
 	/// C...Vertex data contains colors
 	/// U...Vertex data contains texture UV coordinates
+	/// M...VERTEX data contains metallness and/or roughness
 	struct VertexData {
 
 		static const int size_pos = sizeof(glm::vec3);
@@ -215,12 +217,14 @@ namespace vvh {
 		static const int size_tex = sizeof(glm::vec2);
 		static const int size_col = sizeof(glm::vec4);
 		static const int size_tan = sizeof(glm::vec3);
+		static const int size_metalRough = sizeof(glm::vec4);
 
 		std::vector<glm::vec3> m_positions;
 		std::vector<glm::vec3> m_normals;
 		std::vector<glm::vec2> m_texCoords;
 		std::vector<glm::vec4> m_colors;
 		std::vector<glm::vec3> m_tangents;
+		std::vector<glm::vec4> m_metalRough;
 
 		std::string getType() const {
 			std::string name;
@@ -229,6 +233,7 @@ namespace vvh {
 			if( m_texCoords.size() > 0 ) name = name + "U";
 			if( m_colors.size() > 0 )    name = name + "C";
 			if( m_tangents.size() > 0 )  name = name + "T";
+			if (m_metalRough.size() > 0)  name = name + "M";
 			return name;
 		}
 
@@ -237,7 +242,8 @@ namespace vvh {
 					m_normals.size()   * sizeof(glm::vec3) + 
 					m_texCoords.size() * sizeof(glm::vec2) + 
 					m_colors.size()    * sizeof(glm::vec4) + 
-					m_tangents.size()  * sizeof(glm::vec3);
+					m_tangents.size()  * sizeof(glm::vec3) +
+					m_metalRough.size() * sizeof(glm::vec4);
 		}
 
 		VkDeviceSize getSize( std::string type ) const {
@@ -245,7 +251,8 @@ namespace vvh {
 					type.find("N") != std::string::npos ? m_normals.size()   * sizeof(glm::vec3) : 0 + 
 					type.find("U") != std::string::npos ? m_texCoords.size() * sizeof(glm::vec2) : 0 + 
 					type.find("C") != std::string::npos ? m_colors.size()    * sizeof(glm::vec4) : 0 + 
-					type.find("T") != std::string::npos ? m_tangents.size()  * sizeof(glm::vec3) : 0;
+					type.find("T") != std::string::npos ? m_tangents.size()  * sizeof(glm::vec3) : 0 +
+					type.find("M") != std::string::npos ? m_metalRough.size() * sizeof(glm::vec4) : 0;
 		}
 
 		std::vector<VkDeviceSize> getOffsets() const {
@@ -256,6 +263,7 @@ namespace vvh {
 			if( size_t size = m_texCoords.size() * size_tex; size > 0 ) { offsets.push_back(offset); offset += size; }
 			if( size_t size = m_colors.size()    * size_col; size > 0 ) { offsets.push_back(offset); offset += size; }
 			if( size_t size = m_tangents.size()  * size_tan; size > 0 ) { offsets.push_back(offset); offset += size; }
+			if (size_t size = m_metalRough.size() * size_metalRough; size > 0) { offsets.push_back(offset); offset += size; }
 			return offsets;
 		}
 
@@ -267,6 +275,7 @@ namespace vvh {
 			if( type.find("U") != std::string::npos ) { offsets.push_back(offset); offset += m_texCoords.size() * size_tex; }
 			if( type.find("C") != std::string::npos ) { offsets.push_back(offset); offset += m_colors.size()    * size_col; }
 			if( type.find("T") != std::string::npos ) { offsets.push_back(offset); offset += m_tangents.size()  * size_tan; }
+			if (type.find("M") != std::string::npos) { offsets.push_back(offset); offset += m_metalRough.size() * size_metalRough; }
 			return offsets;
 		}
 
@@ -277,6 +286,7 @@ namespace vvh {
 			size = m_texCoords.size() * size_tex; memcpy( (char*)data + offset, m_texCoords.data(), size ); offset += size;
 			size = m_colors.size()    * size_col; memcpy( (char*)data + offset, m_colors.data(), size );    offset += size;
 			size = m_tangents.size()  * size_tan; memcpy( (char*)data + offset, m_tangents.data(), size );  offset += size;
+			size = m_metalRough.size() * size_metalRough; memcpy((char*)data + offset, m_metalRough.data(), size);  offset += size;
 		}
 
 		void copyData( void* data, std::string type  ) {
@@ -286,6 +296,7 @@ namespace vvh {
 			if( type.find("U") != std::string::npos ) { size = m_texCoords.size() * size_tex; memcpy( (char*)data + offset, m_texCoords.data(), size ); offset += size; }
 			if( type.find("C") != std::string::npos ) { size = m_colors.size()    * size_col; memcpy( (char*)data + offset, m_colors.data(), size ); offset += size; }
 			if( type.find("T") != std::string::npos ) { size = m_tangents.size()  * size_tan; memcpy( (char*)data + offset, m_tangents.data(), size ); offset += size; }
+			if (type.find("M") != std::string::npos) { size = m_metalRough.size() * size_metalRough; memcpy((char*)data + offset, m_metalRough.data(), size); offset += size; }
 		}
     };
 
