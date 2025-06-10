@@ -348,18 +348,18 @@ namespace vvh {
 
 	//---------------------------------------------------------------------------------------------
 
-	struct ComStartRecordCommandBufferClearValueInfo {
+	struct ComBeginRenderPass2Info {
 		const VkCommandBuffer&				m_commandBuffer;
 		const uint32_t&						m_imageIndex;
 		const SwapChain&					m_swapChain;
 		const std::vector<VkFramebuffer>&	m_gBufferFramebuffers;
 		const VkRenderPass&					m_renderPass;
-		const std::array<VkClearValue, 4>&	m_clearValues;
+		const std::vector<VkClearValue>&	m_clearValues;
 		const uint32_t&						m_currentFrame;
 	};
 
-	// Used by deferred renderer
-	template<typename T = ComStartRecordCommandBufferClearValueInfo>
+	// Used by deferred renderer 1.1
+	template<typename T = ComBeginRenderPass2Info>
 	inline void ComBeginRenderPass2(T&& info) {
 
 		VkRenderPassBeginInfo renderPassInfo{};
