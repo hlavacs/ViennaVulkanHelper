@@ -99,19 +99,37 @@ namespace vvh {
 		int numbetShadows;
 	};
 
+	// Helper struct for easier padding
+	struct alignas(16) PadVec3 {
+		glm::vec3 m_value;
+
+		constexpr PadVec3() : m_value(0.0f) {}
+		constexpr PadVec3(float x, float y, float z) : m_value(x, y, z) {}
+		constexpr PadVec3(const glm::vec3& v) : m_value(v) {}
+
+		constexpr operator glm::vec3() const { return m_value; }
+
+		constexpr PadVec3& operator=(const glm::vec3& v) {
+			m_value = v;
+			return *this;
+		}
+
+	private:
+		float m_pad{ 0.0f };
+	};
+
 	//param.x==0...no light, param.x==1...point, param.x==2...directional, param.x==3...spotlight
-	struct LightParams {
-		alignas(16) glm::vec3 color{1.0f, 0.0f, 0.0f}; 
+	struct alignas(16) LightParams {
+		PadVec3 color{1.0f, 0.0f, 0.0f};
 		alignas(16) glm::vec4 params{0.0f, 1.0f, 10.0, 0.15f}; //x=type, y=intensity, z=power, w=ambient
-		alignas(16) glm::vec3 attenuation{1.0f, 0.01f, 0.005f}; //x=constant, y=linear, z=quadratic
-		float padding;
+		PadVec3 attenuation{1.0f, 0.01f, 0.005f}; //x=constant, y=linear, z=quadratic
 	};
 
 	//params.param.x==0...no light, params.param.x==1...point, params.param.x==2...directional, params.param.x==3...spotlight
-	struct Light {
-	    alignas(16) glm::vec3 	positionW{100.0f, 100.0f, 100.0f};
-	    alignas(16) glm::vec3 	directionW{-1.0f, -1.0f, -1.0f}; 
-	    alignas(16) LightParams lightParams;
+	struct alignas(16) Light {
+		PadVec3 	positionW{100.0f, 100.0f, 100.0f};
+		PadVec3 	directionW{-1.0f, -1.0f, -1.0f};
+	    LightParams lightParams;
 	};
 
 	struct LightOffset {
