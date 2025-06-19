@@ -95,6 +95,29 @@ namespace vvh {
 
 	//---------------------------------------------------------------------------------------------
 
+	struct ComCreateSingleCommandBufferInfo {
+		const VkDevice& m_device;
+		const VkCommandPool& m_commandPool;
+		VkCommandBuffer& m_commandBuffer;
+	};
+
+	// used to create a single cmd buf
+	template<typename T = ComCreateSingleCommandBufferInfo>
+	inline void ComCreateSingleCommandBuffer(T&& info) {
+
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.commandPool = info.m_commandPool;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandBufferCount = 1;
+
+		if (vkAllocateCommandBuffers(info.m_device, &allocInfo, &info.m_commandBuffer) != VK_SUCCESS) {
+			throw std::runtime_error("failed to allocate command buffers!");
+		}
+	}
+
+	//---------------------------------------------------------------------------------------------
+
 	struct ComBeginCommandBufferInfo {
 		const VkCommandBuffer& m_commandBuffer;
 	};
