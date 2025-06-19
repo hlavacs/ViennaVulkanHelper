@@ -566,13 +566,19 @@ namespace vvh {
 		VkPhysicalDeviceVulkan11Features deviceFeatures11{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES };
 		deviceFeatures11.shaderDrawParameters = VK_TRUE;
 
+		// --- 1.2
+		VkPhysicalDeviceVulkan12Features deviceFeatures12{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES };
+		deviceFeatures12.shaderOutputLayer = VK_TRUE;
+		deviceFeatures12.shaderOutputViewportIndex = VK_TRUE;
+
 		// --- 1.3
 		VkPhysicalDeviceVulkan13Features deviceFeatures13{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES };
 		deviceFeatures13.dynamicRendering = VK_TRUE;
 
 		// All enabled features
 		deviceFeatures2.pNext = &deviceFeatures11;
-		deviceFeatures11.pNext = &deviceFeatures13;
+		deviceFeatures11.pNext = &deviceFeatures12;
+		deviceFeatures12.pNext = &deviceFeatures13;
 		deviceFeatures13.pNext = nullptr;
 
 		VkDeviceCreateInfo createInfo{};
