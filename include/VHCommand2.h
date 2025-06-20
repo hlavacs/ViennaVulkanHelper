@@ -374,7 +374,7 @@ namespace vvh {
 	struct ComBeginRenderPass2Info {
 		const VkCommandBuffer&				m_commandBuffer;
 		const uint32_t&						m_imageIndex;
-		const SwapChain&					m_swapChain;
+		const VkExtent2D&					m_extent;
 		const std::vector<VkFramebuffer>&	m_framebuffers;
 		const VkRenderPass&					m_renderPass;
 		const std::vector<VkClearValue>&	m_clearValues;
@@ -390,7 +390,7 @@ namespace vvh {
 		renderPassInfo.renderPass = info.m_renderPass;
 		renderPassInfo.framebuffer = info.m_framebuffers[info.m_imageIndex];
 		renderPassInfo.renderArea.offset = { 0, 0 };
-		renderPassInfo.renderArea.extent = info.m_swapChain.m_swapChainExtent;
+		renderPassInfo.renderArea.extent = info.m_extent;
 
 		if (info.m_clearValues.size()) {
 			renderPassInfo.clearValueCount = static_cast<uint32_t>(info.m_clearValues.size());
