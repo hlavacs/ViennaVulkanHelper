@@ -95,7 +95,7 @@ namespace vvh {
 
 	struct ShadowOffset {
 		int shadowIndexOffset;
-		int numbetShadows;
+		int numberShadows;
 	};
 
 	// Helper struct for easier padding
