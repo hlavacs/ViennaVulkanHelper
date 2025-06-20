@@ -375,7 +375,7 @@ namespace vvh {
 		const VkCommandBuffer&				m_commandBuffer;
 		const uint32_t&						m_imageIndex;
 		const SwapChain&					m_swapChain;
-		const std::vector<VkFramebuffer>&	m_gBufferFramebuffers;
+		const std::vector<VkFramebuffer>&	m_framebuffers;
 		const VkRenderPass&					m_renderPass;
 		const std::vector<VkClearValue>&	m_clearValues;
 		const uint32_t&						m_currentFrame;
@@ -388,7 +388,7 @@ namespace vvh {
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassInfo.renderPass = info.m_renderPass;
-		renderPassInfo.framebuffer = info.m_gBufferFramebuffers[info.m_imageIndex];
+		renderPassInfo.framebuffer = info.m_framebuffers[info.m_imageIndex];
 		renderPassInfo.renderArea.offset = { 0, 0 };
 		renderPassInfo.renderArea.extent = info.m_swapChain.m_swapChainExtent;
 
