@@ -324,6 +324,7 @@ namespace vvh {
 		const VkImageAspectFlags& 	m_aspects;
 		const uint32_t& 			m_layers;
 		const uint32_t& 			m_mipLevels;
+		const VkImageViewType&		m_viewType = VK_IMAGE_VIEW_TYPE_2D;
 	}; 
 	
 	template<typename T = ImgCreateImageViewInfo>
@@ -331,7 +332,7 @@ namespace vvh {
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         viewInfo.image = info.m_image;
-        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        viewInfo.viewType = info.m_viewType;
         viewInfo.format = info.m_format;
         viewInfo.subresourceRange.aspectMask = info.m_aspects;
         viewInfo.subresourceRange.baseMipLevel = 0;
