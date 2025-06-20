@@ -200,7 +200,6 @@ namespace vvh {
     struct RenCreateRenderPassShadowInfo {
         const VkFormat& m_depthFormat;
         const VkDevice& m_device;
-        const SwapChain& m_swapChain;
         const bool& m_clear;
         VkRenderPass& m_renderPass;
     };
