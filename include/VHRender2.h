@@ -583,7 +583,7 @@ namespace vvh {
             VkPipelineRenderingCreateInfo pipelineRendereringCreateInfo{ VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO };
             pipelineRendereringCreateInfo.pNext = VK_NULL_HANDLE;
             pipelineRendereringCreateInfo.colorAttachmentCount = static_cast<uint32_t>(info.m_attachmentFormats.size());
-            pipelineRendereringCreateInfo.pColorAttachmentFormats = info.m_attachmentFormats.data();;
+            pipelineRendereringCreateInfo.pColorAttachmentFormats = info.m_attachmentFormats.data();
             pipelineRendereringCreateInfo.depthAttachmentFormat = info.m_depthFormat;
 
             pipelineInfo.pNext = &pipelineRendereringCreateInfo;	// dynamic rendering

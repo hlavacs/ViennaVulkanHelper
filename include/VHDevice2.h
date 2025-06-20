@@ -567,6 +567,7 @@ namespace vvh {
 		deviceFeatures11.shaderDrawParameters = VK_TRUE;
 
 		// --- 1.2
+		// TODO: Currently rewritten, might not be needed!
 		VkPhysicalDeviceVulkan12Features deviceFeatures12{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES };
 		deviceFeatures12.shaderOutputLayer = VK_TRUE;
 		deviceFeatures12.shaderOutputViewportIndex = VK_TRUE;
