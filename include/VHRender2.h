@@ -670,6 +670,40 @@ namespace vvh {
 
     //---------------------------------------------------------------------------------------------
 
+    // Used for shadow
+    struct RenCreateSingleFrameBufferInfo {
+        const VkDevice& m_device;
+        const VkRenderPass& m_renderPass;
+        VkFramebuffer& m_frameBuffer;
+        const VkImageView& m_imageView;
+        const VkExtent2D& m_extent;
+        const uint32_t& m_numLayers;
+    };
+
+    template<typename T = RenCreateSingleFrameBufferInfo>
+    inline void RenCreateSingleFrameBuffer(T&& info) {
+
+        std::array<VkImageView, 1> attachments = {
+            info.m_imageView
+        };
+
+        VkFramebufferCreateInfo framebufferInfo{};
+        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferInfo.renderPass = info.m_renderPass;
+        framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        framebufferInfo.pAttachments = attachments.data();
+        framebufferInfo.width = info.m_extent.width;
+        framebufferInfo.height = info.m_extent.height;
+        framebufferInfo.layers = info.m_numLayers;
+
+        if (vkCreateFramebuffer(info.m_device, &framebufferInfo, nullptr, &info.m_frameBuffer) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create framebuffer!");
+        }
+        
+    }
+
+    //---------------------------------------------------------------------------------------------
+
 	struct RenFindSupportedFormatInfo {
 		const VkPhysicalDevice& 		m_physicalDevice;
 		const std::vector<VkFormat>& 	m_candidates;
