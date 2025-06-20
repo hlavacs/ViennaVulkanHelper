@@ -197,6 +197,53 @@ namespace vvh {
 
     //---------------------------------------------------------------------------------------------
 
+    struct RenCreateRenderPassShadowInfo {
+        const VkFormat& m_depthFormat;
+        const VkDevice& m_device;
+        const SwapChain& m_swapChain;
+        const bool& m_clear;
+        VkRenderPass& m_renderPass;
+    };
+
+    template<typename T = RenCreateRenderPassShadowInfo>
+    inline void RenCreateRenderPassShadow(T&& info) {
+        VkAttachmentDescription depthAttachment{};
+        depthAttachment.format = info.m_depthFormat;
+        depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        depthAttachment.loadOp = info.m_clear ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_LOAD;
+        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachment.initialLayout = info.m_clear ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        std::array<VkAttachmentDescription, 1> attachments = { depthAttachment };
+
+        VkAttachmentReference depthAttachmentRef{};
+        depthAttachmentRef.attachment = 0;
+        depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        VkSubpassDescription subpass{};
+        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpass.colorAttachmentCount = 0;
+        subpass.pDepthStencilAttachment = &depthAttachmentRef;
+
+        VkRenderPassCreateInfo renderPassInfo{};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        renderPassInfo.pAttachments = attachments.data();
+        renderPassInfo.subpassCount = 1;
+        renderPassInfo.pSubpasses = &subpass;
+        renderPassInfo.dependencyCount = 0;
+        renderPassInfo.pDependencies = nullptr;
+
+        if (vkCreateRenderPass(info.m_device, &renderPassInfo, nullptr, &info.m_renderPass) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create shadow render pass!");
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------
+
 	struct RenCreateDescriptorSetLayoutInfo {
 		const VkDevice& 									m_device;
 		const std::vector<VkDescriptorSetLayoutBinding>& 	m_bindings;
