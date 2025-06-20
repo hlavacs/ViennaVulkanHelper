@@ -482,13 +482,11 @@ namespace vvh {
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-
-		if( !info.m_fragShaderPath.empty() ) {
-	        vertexInputInfo.vertexBindingDescriptionCount = (uint32_t)info.m_bindingDescription.size();
-	        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(info.m_attributeDescriptions.size());
-	        vertexInputInfo.pVertexBindingDescriptions = info.m_bindingDescription.data();
-	        vertexInputInfo.pVertexAttributeDescriptions = info.m_attributeDescriptions.data();
-		}
+	    vertexInputInfo.vertexBindingDescriptionCount = (uint32_t)info.m_bindingDescription.size();
+	    vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(info.m_attributeDescriptions.size());
+	    vertexInputInfo.pVertexBindingDescriptions = info.m_bindingDescription.data();
+	    vertexInputInfo.pVertexAttributeDescriptions = info.m_attributeDescriptions.data();
+		
 
         VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
         inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
