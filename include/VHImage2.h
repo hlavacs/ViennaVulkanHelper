@@ -411,6 +411,7 @@ namespace vvh {
 		const VkMemoryPropertyFlags& m_properties; 
 		VkImage& 		m_image; 
 		VmaAllocation& 	m_imageAllocation;
+		const VkImageCreateFlags& m_imgCreateFlags = 0;
 	};
 
 	template<typename T = ImgCreateImageInfo>
@@ -429,6 +430,7 @@ namespace vvh {
 		imageInfo.usage 		= info.m_usage;
 		imageInfo.samples 		= VK_SAMPLE_COUNT_1_BIT;
 		imageInfo.sharingMode 	= VK_SHARING_MODE_EXCLUSIVE;
+		imageInfo.flags			= info.m_imgCreateFlags;
 
 		VmaAllocationCreateInfo allocInfo = {};
 		allocInfo.usage = VMA_MEMORY_USAGE_AUTO;
