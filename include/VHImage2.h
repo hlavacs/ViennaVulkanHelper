@@ -292,6 +292,11 @@ namespace vvh {
 		const VkBorderColor& m_borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 		const VkCompareOp& m_compareOp = VK_COMPARE_OP_ALWAYS;
 		const VkSamplerMipmapMode& m_mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+		const VkBool32& m_anisotropyEnable = VK_FALSE;
+		const VkBool32& m_unnormalizedCoordinates = VK_FALSE;
+		const VkBool32& m_compareEnable = VK_FALSE;
+		const float& m_minLod = 0.0f;
+		const float& m_maxLod = 0.0f;
 	};
 
 	template<typename T = ImgCreateImageSamplerInfo>
@@ -306,15 +311,15 @@ namespace vvh {
 		samplerInfo.addressModeU = info.m_addressMode;
 		samplerInfo.addressModeV = info.m_addressMode;
 		samplerInfo.addressModeW = info.m_addressMode;
-		samplerInfo.anisotropyEnable = VK_FALSE;
-		samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
 		samplerInfo.borderColor = info.m_borderColor;
-		samplerInfo.unnormalizedCoordinates = VK_FALSE;
-		samplerInfo.compareEnable = VK_FALSE;
 		samplerInfo.compareOp = info.m_compareOp;
 		samplerInfo.mipmapMode = info.m_mipmapMode;
-		samplerInfo.minLod = 0.0f;
-		samplerInfo.maxLod = 0.0f;
+		samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+		samplerInfo.anisotropyEnable = info.m_anisotropyEnable;
+		samplerInfo.unnormalizedCoordinates = info.m_unnormalizedCoordinates;
+		samplerInfo.compareEnable = info.m_compareEnable;
+		samplerInfo.minLod = info.m_minLod;
+		samplerInfo.maxLod = info.m_maxLod;
 
 		if (vkCreateSampler(info.m_device, &samplerInfo, nullptr, &info.m_sampler) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create image sampler!");
