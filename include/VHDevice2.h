@@ -476,6 +476,7 @@ namespace vvh {
 
 		VkPhysicalDeviceFeatures deviceFeatures{};
 		deviceFeatures.samplerAnisotropy = VK_TRUE;
+		deviceFeatures.imageCubeArray = VK_TRUE;	// TODO: check if needed later
 
 		// Combines all enabled features with pNext
 		VkPhysicalDeviceFeatures2  deviceFeatures2{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2 };
@@ -557,6 +558,7 @@ namespace vvh {
 
 		VkPhysicalDeviceFeatures deviceFeatures{};
 		deviceFeatures.samplerAnisotropy = VK_TRUE;
+		deviceFeatures.imageCubeArray = VK_TRUE;	// TODO: Put into 1.1
 
 		// Combines all enabled features with pNext
 		VkPhysicalDeviceFeatures2  deviceFeatures2{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2 };
