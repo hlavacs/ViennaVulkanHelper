@@ -476,7 +476,7 @@ namespace vvh {
 	        fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 	        fragShaderStageInfo.module = fragShaderModule;
 	        fragShaderStageInfo.pName = "main";
-			vertShaderStageInfo.pSpecializationInfo = &specializationInfo;
+			vertShaderStageInfo.pSpecializationInfo = &specializationInfo;  // TODO: ???
 			shaderStages.push_back(fragShaderStageInfo);
 		}
 

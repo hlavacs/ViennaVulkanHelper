@@ -173,7 +173,7 @@ namespace vvh {
 		const VkCommandBuffer& 				m_commandBuffer;
 		const Pipeline& 						m_graphicsPipeline;
 		const uint32_t&					m_imageIndex;
-        const SwapChain& 				m_swapChain;
+        const VkExtent2D& 				m_extent;
 		const VkRenderPass& 			m_renderPass; 
         const std::vector<VkViewport>& 	m_viewPorts;
 		const std::vector<VkRect2D>& 	m_scissors;
@@ -189,8 +189,8 @@ namespace vvh {
 		VkViewport viewport{};
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = (float) info.m_swapChain.m_swapChainExtent.width;
-		viewport.height = (float) info.m_swapChain.m_swapChainExtent.height;
+		viewport.width = (float) info.m_extent.width;
+		viewport.height = (float) info.m_extent.height;
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 		if(viewPorts.size() == 0) viewPorts.push_back(viewport);
@@ -200,7 +200,7 @@ namespace vvh {
 		std::vector<VkRect2D> scissors = info.m_scissors;
 		VkRect2D scissor{};
 		scissor.offset = {0, 0};
-		scissor.extent = info.m_swapChain.m_swapChainExtent;
+		scissor.extent = info.m_extent;
 		if(scissors.size() == 0) scissors.push_back(scissor);
 		vkCmdSetScissor(info.m_commandBuffer, 0, static_cast<uint32_t>(scissors.size()), scissors.data());
 
