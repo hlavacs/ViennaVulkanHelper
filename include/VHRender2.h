@@ -851,23 +851,24 @@ namespace vvh {
 
     //---------------------------------------------------------------------------------------------
 
-    struct RenUpdateDescriptorSetGBufferAttachmentInfo {
+    struct RenUpdateImageDescriptorSetInfo {
         const VkDevice&         m_device;
-        const GBufferImage&     m_gbufferImage;
+        const VkImageView&      m_imageView;
+        const VkSampler&        m_sampler;
         const size_t&           m_binding;
         const DescriptorSet&    m_descriptorSet;
     };
 
-    template<typename T = RenUpdateDescriptorSetGBufferAttachmentInfo>
-    inline void RenUpdateDescriptorSetGBufferAttachment(T&& info) {
+    template<typename T = RenUpdateImageDescriptorSetInfo>
+    inline void RenUpdateImageDescriptorSet(T&& info) {
         size_t i = 0;
         for (auto& ds : info.m_descriptorSet.m_descriptorSetPerFrameInFlight) {
 
             VkDescriptorImageInfo imageInfo{};
             imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
             //imageInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            imageInfo.imageView = info.m_gbufferImage.m_gbufferImageView;
-            imageInfo.sampler = info.m_gbufferImage.m_gbufferSampler;
+            imageInfo.imageView = info.m_imageView;
+            imageInfo.sampler = info.m_sampler;
 
             VkWriteDescriptorSet descriptorWrites{};
 
