@@ -857,6 +857,7 @@ namespace vvh {
         const VkSampler&        m_sampler;
         const size_t&           m_binding;
         const DescriptorSet&    m_descriptorSet;
+        const VkDescriptorType& m_descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     };
 
     template<typename T = RenUpdateImageDescriptorSetInfo>
@@ -876,7 +877,7 @@ namespace vvh {
             descriptorWrites.dstSet = ds;
             descriptorWrites.dstBinding = static_cast<uint32_t>(info.m_binding);
             descriptorWrites.dstArrayElement = 0;
-            descriptorWrites.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            descriptorWrites.descriptorType = info.m_descriptorType;
             descriptorWrites.descriptorCount = 1;
             descriptorWrites.pImageInfo = &imageInfo;
 
