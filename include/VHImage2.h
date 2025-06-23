@@ -336,6 +336,7 @@ namespace vvh {
 		const uint32_t& 			m_layers;
 		const uint32_t& 			m_mipLevels;
 		const VkImageViewType&		m_viewType = VK_IMAGE_VIEW_TYPE_2D;
+		const uint32_t&				m_baseArrayLayer = 0;
 	}; 
 	
 	template<typename T = ImgCreateImageViewInfo>
@@ -348,7 +349,7 @@ namespace vvh {
         viewInfo.subresourceRange.aspectMask = info.m_aspects;
         viewInfo.subresourceRange.baseMipLevel = 0;
         viewInfo.subresourceRange.levelCount = info.m_mipLevels;
-        viewInfo.subresourceRange.baseArrayLayer = 0;
+        viewInfo.subresourceRange.baseArrayLayer = info.m_baseArrayLayer;
         viewInfo.subresourceRange.layerCount = info.m_layers;
 
         VkImageView imageView;
