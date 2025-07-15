@@ -213,11 +213,11 @@ namespace vvh {
 
 	// Deferred Renderer helpers
 	struct GBufferImage {
-		VkImage         m_gbufferImage;
-		VmaAllocation   m_gbufferImageAllocation;
-		VkImageView     m_gbufferImageView;
+		VkImage         m_gbufferImage{ VK_NULL_HANDLE };
+		VmaAllocation   m_gbufferImageAllocation{ VK_NULL_HANDLE };
+		VkImageView     m_gbufferImageView{ VK_NULL_HANDLE };
 		VkFormat		m_gbufferFormat;
-		VkSampler       m_gbufferSampler;
+		VkSampler       m_gbufferSampler{ VK_NULL_HANDLE };
 	};
 
 	struct Material {
