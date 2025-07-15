@@ -10,7 +10,6 @@ namespace vvh {
 		const VkQueue& m_graphicsQueue;
 		const VkCommandPool& m_commandPool;
 		const VkImage& m_image;
-		const VkFormat& m_format;
 		const VkImageAspectFlags& m_aspect = VK_IMAGE_ASPECT_COLOR_BIT;
 		const int& m_mipLevels = 1;
 		const int& m_layers = 1;
