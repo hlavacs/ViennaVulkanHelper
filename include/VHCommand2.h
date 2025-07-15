@@ -378,7 +378,6 @@ namespace vvh {
 		const std::vector<VkFramebuffer>&	m_framebuffers;
 		const VkRenderPass&					m_renderPass;
 		const std::vector<VkClearValue>&	m_clearValues;
-		const uint32_t&						m_currentFrame;
 	};
 
 	// Used by deferred renderer 1.1
