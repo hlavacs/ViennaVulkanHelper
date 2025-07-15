@@ -170,16 +170,13 @@ namespace vvh {
 	//---------------------------------------------------------------------------------------------
 
     struct ComBindPipelineInfo { 
-		const VkCommandBuffer& 				m_commandBuffer;
-		const Pipeline& 						m_graphicsPipeline;
-		const uint32_t&					m_imageIndex;
+		const VkCommandBuffer& 			m_commandBuffer;
+		const Pipeline& 				m_graphicsPipeline;
         const VkExtent2D& 				m_extent;
-		const VkRenderPass& 			m_renderPass; 
         const std::vector<VkViewport>& 	m_viewPorts;
 		const std::vector<VkRect2D>& 	m_scissors;
         const std::array<float,4>& 		m_blendConstants;
 		const std::vector<PushConstants>& m_pushConstants;
-        const uint32_t& 				m_currentFrame;
 	};
 
 	template<typename T = ComBindPipelineInfo>
