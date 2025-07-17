@@ -436,6 +436,7 @@ namespace vvh {
         const std::vector<VkFormat>&    m_attachmentFormats = {};
         const VkFormat&                 m_depthFormat = VK_FORMAT_UNDEFINED;
         const bool& m_depthWrite = true;
+        const VkCullModeFlagBits m_cullModeFlagBits = VK_CULL_MODE_BACK_BIT;
 	};
 
     // Works for both dynamic and non dynamic rendering, depending on m_renderPass
