@@ -895,18 +895,20 @@ namespace vvh {
         std::vector<VkFramebuffer>& m_gBufferFrameBuffers;
         const DepthImage& m_depthImage;
         const VkRenderPass& m_renderPass;
+        const size_t m_attachCount;
+        const size_t m_framesInFlight;
     };
 
     template<typename T = RenCreateGBufferFrameBuffersInfo>
     inline void RenCreateGBufferFrameBuffers(T&& info) {
 
-        info.m_gBufferFrameBuffers.resize(info.m_swapChain.m_swapChainImageViews.size());
+        info.m_gBufferFrameBuffers.resize(info.m_attachCount + info.m_framesInFlight);  // plus depth
 
-        for (size_t i = 0; i < info.m_gBufferFrameBuffers.size(); i++) {
+        for (size_t i = 0; i < info.m_framesInFlight; i++) {
             std::vector<VkImageView> attachments{};
-            attachments.reserve(info.m_gBufferAttachs.size());
-            for (size_t i = 0; i < info.m_gBufferAttachs.size(); ++i) {
-                attachments.push_back(info.m_gBufferAttachs[i].m_gbufferImageView);
+            attachments.reserve(info.m_attachCount + 1);
+            for (size_t j = 0; j < info.m_attachCount; ++j) {
+                attachments.push_back(info.m_gBufferAttachs[j + i * info.m_attachCount].m_gbufferImageView);
             }
             attachments.push_back(info.m_depthImage.m_depthImageView);
 
