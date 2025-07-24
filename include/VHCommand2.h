@@ -369,12 +369,12 @@ namespace vvh {
 	//---------------------------------------------------------------------------------------------
 
 	struct ComBeginRenderPass2Info {
-		const VkCommandBuffer&				m_commandBuffer;
-		const uint32_t&						m_imageIndex;
-		const VkExtent2D&					m_extent;
-		const std::vector<VkFramebuffer>&	m_framebuffers;
-		const VkRenderPass&					m_renderPass;
-		const std::vector<VkClearValue>&	m_clearValues;
+		const VkCommandBuffer&					m_commandBuffer;
+		const uint32_t&							m_imageIndex;
+		const VkExtent2D&						m_extent;
+		const std::vector<VkFramebuffer>&		m_framebuffers;
+		const VkRenderPass&						m_renderPass;
+		const std::span<const VkClearValue>&	m_clearValues;
 	};
 
 	// Used by deferred renderer 1.1
