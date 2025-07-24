@@ -856,33 +856,30 @@ namespace vvh {
         const VkImageView&      m_imageView;
         const VkSampler&        m_sampler;
         const size_t&           m_binding;
-        const DescriptorSet&    m_descriptorSet;
+        const VkDescriptorSet&  m_descriptorSet;
         const VkDescriptorType& m_descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     };
 
     template<typename T = RenUpdateImageDescriptorSetInfo>
     inline void RenUpdateImageDescriptorSet(T&& info) {
-        size_t i = 0;
-        for (auto& ds : info.m_descriptorSet.m_descriptorSetPerFrameInFlight) {
 
-            VkDescriptorImageInfo imageInfo{};
-            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            //imageInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            imageInfo.imageView = info.m_imageView;
-            imageInfo.sampler = info.m_sampler;
+        VkDescriptorImageInfo imageInfo{};
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        //imageInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        imageInfo.imageView = info.m_imageView;
+        imageInfo.sampler = info.m_sampler;
 
-            VkWriteDescriptorSet descriptorWrites{};
+        VkWriteDescriptorSet descriptorWrites{};
 
-            descriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWrites.dstSet = ds;
-            descriptorWrites.dstBinding = static_cast<uint32_t>(info.m_binding);
-            descriptorWrites.dstArrayElement = 0;
-            descriptorWrites.descriptorType = info.m_descriptorType;
-            descriptorWrites.descriptorCount = 1;
-            descriptorWrites.pImageInfo = &imageInfo;
+        descriptorWrites.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites.dstSet = info.m_descriptorSet;
+        descriptorWrites.dstBinding = static_cast<uint32_t>(info.m_binding);
+        descriptorWrites.dstArrayElement = 0;
+        descriptorWrites.descriptorType = info.m_descriptorType;
+        descriptorWrites.descriptorCount = 1;
+        descriptorWrites.pImageInfo = &imageInfo;
 
-            vkUpdateDescriptorSets(info.m_device, 1, &descriptorWrites, 0, nullptr);
-        }
+        vkUpdateDescriptorSets(info.m_device, 1, &descriptorWrites, 0, nullptr);
     }
 
     //---------------------------------------------------------------------------------------------
