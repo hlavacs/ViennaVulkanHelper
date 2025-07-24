@@ -372,7 +372,7 @@ namespace vvh {
 		const VkCommandBuffer&					m_commandBuffer;
 		const uint32_t&							m_imageIndex;
 		const VkExtent2D&						m_extent;
-		const std::vector<VkFramebuffer>&		m_framebuffers;
+		const std::span<VkFramebuffer>&			m_framebuffers;
 		const VkRenderPass&						m_renderPass;
 		const std::span<const VkClearValue>&	m_clearValues;
 	};

@@ -638,13 +638,12 @@ namespace vvh {
     struct RenCreateFrameBuffers2Info {
         const VkDevice& m_device;
         const VkRenderPass& m_renderPass;
-        SwapChain& m_swapChain;
-        std::vector<VkFramebuffer>& m_frameBuffers;
+        const SwapChain& m_swapChain;
+        const std::span<VkFramebuffer>& m_frameBuffers;
     };
 
     template<typename T = RenCreateFrameBuffers2Info>
     inline void RenCreateFrameBuffers2(T&& info) {
-        info.m_frameBuffers.resize(info.m_swapChain.m_swapChainImageViews.size());
 
         for (size_t i = 0; i < info.m_frameBuffers.size(); i++) {
             std::array<VkImageView, 1> attachments = {
@@ -892,7 +891,7 @@ namespace vvh {
         const VkDevice& m_device;
         const SwapChain& m_swapChain;
         const std::vector<GBufferImage>& m_gBufferAttachs;
-        std::vector<VkFramebuffer>& m_gBufferFrameBuffers;
+        const std::span<VkFramebuffer>& m_gBufferFrameBuffers;
         const DepthImage& m_depthImage;
         const VkRenderPass& m_renderPass;
         const size_t m_attachCount;
@@ -901,8 +900,6 @@ namespace vvh {
 
     template<typename T = RenCreateGBufferFrameBuffersInfo>
     inline void RenCreateGBufferFrameBuffers(T&& info) {
-
-        info.m_gBufferFrameBuffers.resize(info.m_attachCount + info.m_framesInFlight);  // plus depth
 
         for (size_t i = 0; i < info.m_framesInFlight; i++) {
             std::vector<VkImageView> attachments{};
