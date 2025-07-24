@@ -889,38 +889,34 @@ namespace vvh {
 
     struct RenCreateGBufferFrameBuffersInfo {
         const VkDevice& m_device;
-        const SwapChain& m_swapChain;
-        const std::vector<GBufferImage>& m_gBufferAttachs;
-        const std::span<VkFramebuffer>& m_gBufferFrameBuffers;
+        const VkExtent2D& m_extent;
+        const std::span<GBufferImage>& m_gBufferAttachs;
+        VkFramebuffer& m_gBufferFrameBuffer;
         const DepthImage& m_depthImage;
         const VkRenderPass& m_renderPass;
-        const size_t m_attachCount;
-        const size_t m_framesInFlight;
     };
 
     template<typename T = RenCreateGBufferFrameBuffersInfo>
     inline void RenCreateGBufferFrameBuffers(T&& info) {
 
-        for (size_t i = 0; i < info.m_framesInFlight; i++) {
-            std::vector<VkImageView> attachments{};
-            attachments.reserve(info.m_attachCount + 1);
-            for (size_t j = 0; j < info.m_attachCount; ++j) {
-                attachments.push_back(info.m_gBufferAttachs[j + i * info.m_attachCount].m_gbufferImageView);
-            }
-            attachments.push_back(info.m_depthImage.m_depthImageView);
+        std::vector<VkImageView> attachments{};
+        attachments.reserve(info.m_gBufferAttachs.size() + 1);
+        for (size_t i = 0; i < info.m_gBufferAttachs.size(); ++i) {
+            attachments.push_back(info.m_gBufferAttachs[i].m_gbufferImageView);
+        }
+        attachments.push_back(info.m_depthImage.m_depthImageView);
 
-            VkFramebufferCreateInfo framebufferInfo{};
-            framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            framebufferInfo.renderPass = info.m_renderPass;
-            framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-            framebufferInfo.pAttachments = attachments.data();
-            framebufferInfo.width = info.m_swapChain.m_swapChainExtent.width;
-            framebufferInfo.height = info.m_swapChain.m_swapChainExtent.height;
-            framebufferInfo.layers = 1;
+        VkFramebufferCreateInfo framebufferInfo{};
+        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferInfo.renderPass = info.m_renderPass;
+        framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        framebufferInfo.pAttachments = attachments.data();
+        framebufferInfo.width = info.m_extent.width;
+        framebufferInfo.height = info.m_extent.height;
+        framebufferInfo.layers = 1;
 
-            if (vkCreateFramebuffer(info.m_device, &framebufferInfo, nullptr, &info.m_gBufferFrameBuffers[i]) != VK_SUCCESS) {
-                throw std::runtime_error("failed to create framebuffer!");
-            }
+        if (vkCreateFramebuffer(info.m_device, &framebufferInfo, nullptr, &info.m_gBufferFrameBuffer) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create framebuffer!");
         }
     }
 
