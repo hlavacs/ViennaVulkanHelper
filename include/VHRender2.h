@@ -858,14 +858,14 @@ namespace vvh {
         const size_t&           m_binding;
         const VkDescriptorSet&  m_descriptorSet;
         const VkDescriptorType& m_descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        const VkImageLayout&    m_imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     };
 
     template<typename T = RenUpdateImageDescriptorSetInfo>
     inline void RenUpdateImageDescriptorSet(T&& info) {
 
         VkDescriptorImageInfo imageInfo{};
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        //imageInfo.imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        imageInfo.imageLayout = info.m_imageLayout;
         imageInfo.imageView = info.m_imageView;
         imageInfo.sampler = info.m_sampler;
 
