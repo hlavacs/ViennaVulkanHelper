@@ -4,26 +4,25 @@ namespace vvh {
 
 	//---------------------------------------------------------------------------------------------
 
-    struct ComCreateCommandPoolinfo {
-		const VkSurfaceKHR& 	m_surface;
+	struct ComCreateCommandPoolinfo {
+		const VkSurfaceKHR& m_surface;
 		const VkPhysicalDevice& m_physicalDevice;
-		const VkDevice& 		m_device;
-		VkCommandPool& 			m_commandPool;
+		const VkDevice& m_device;
+		const uint32_t& m_queueFamilyIndex;
+		VkCommandPool& m_commandPool;
 	};
 
 	template<typename T = ComCreateCommandPoolinfo>
 	inline void ComCreateCommandPool(T&& info) {
-        QueueFamilyIndices queueFamilyIndices = DevFindQueueFamilies({ info.m_physicalDevice, info.m_surface });
+		VkCommandPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		poolInfo.queueFamilyIndex = info.m_queueFamilyIndex;
 
-        VkCommandPoolCreateInfo poolInfo{};
-        poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
-
-        if (vkCreateCommandPool(info.m_device, &poolInfo, nullptr, &info.m_commandPool) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create graphics command pool!");
-        }
-    }
+		if (vkCreateCommandPool(info.m_device, &poolInfo, nullptr, &info.m_commandPool) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create graphics command pool!");
+		}
+	}
 
 	//---------------------------------------------------------------------------------------------
 
